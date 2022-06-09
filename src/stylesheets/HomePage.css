@@ -1,0 +1,143 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: montserrat, sans-serif;
+    color: rgb(79, 73, 73);
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.44, rgb(192, 130, 211)), color-stop(0.72, rgb(156, 153, 255)), color-stop(0.86, rgb(67, 168, 199)));
+}
+
+.App {
+    background-image: url(../images/bg-home.png);
+    background-size: 120% 100%;
+    height: 220vh;
+}
+
+.navBar {
+    background-color: #000000;
+    position: fixed;
+    width: 100%;
+    height: 10%;
+}
+
+h2 {
+    font-family: serif;
+    color: #5b6058;
+    font-size: 50px;
+    font-weight: bold;
+    width: 50%;
+    /* padding: 70px; */
+    margin-top: 2.2em;
+    margin-left: 3em;
+}
+
+.upper-box {
+    display: flex;
+    align-items: center;
+    align-content: flex-start;
+    justify-content: flex-start;
+}
+
+.some-text {
+    display: inline-block;
+    font-family: serif;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    width: 500px;
+    margin-top: 2em;
+    margin-left: 9.5em;
+}
+
+.avocado-image {
+    background-image: url(../images/big-avocado.png);
+    background-size: 100% 100%;
+    width: 25em;
+    height: 25em;
+    margin-left: 2.5em;
+    margin-top: 7em;
+}
+
+.fruits-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: space-around;
+    justify-content: center;
+    gap: 70px;
+}
+
+.container.grid-one {
+    display: flex;
+    align-items: center;
+    align-content: flex-start;
+    gap: 45px;
+}
+
+.see-more {
+    background-image: url(../images/see-more.png);
+    background-size: 100% 100%;
+    width: 40px;
+    height: 40px;
+    color: #000000;
+    /* margin-left: 20px;
+    margin-top: 30px;
+    margin-right: 10px;
+    margin-bottom: 10px; */
+    border-radius: 10px;
+    font-family: serif;
+    text-align: center;
+}
+
+.name {
+    font-family: serif;
+    color: #3a3d38;
+    font-size: x-large;
+    margin-top: 0;
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.color {
+    font-family: serif;
+    color: white;
+    font-size: x-large;
+    text-align: right;
+    margin-top: 25px;
+    margin-left: 50px;
+    display: inline-block;
+}
+
+.image-fruit {
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+}
+
+.box-fruit {
+    border-style: none;
+    border-radius: 10px;
+    width: 250px;
+    height: 250px;
+}
+
+.description {
+    font-size: 15px;
+    color: #aaadaf;
+    margin: 18px;
+}

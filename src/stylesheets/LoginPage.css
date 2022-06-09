@@ -1,0 +1,301 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: montserrat, sans-serif;
+    color: rgb(79, 73, 73);
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: none;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.44, #023335), color-stop(0.72, #023e41), color-stop(0.86, #03565a));
+}
+
+input,
+button {
+    appearance: none;
+    background: none;
+    border: none;
+    outline: none;
+}
+
+.App {
+    background-color: #00d1b2;
+    background-repeat: no-repeat;
+    background-size: 100% 115%;
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+form {
+    display: block;
+    position: relative;
+}
+
+form:after {
+    content: '';
+    display: b;
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    right: -40px;
+    bottom: -40px;
+    z-index: 1;
+    border-radius: 10px;
+    background-color: white;
+}
+
+form .login-info {
+    width: 400px;
+    position: relative;
+    display: inline-block;
+    background-color: #FFFFFF;
+    padding-right: 30px;
+    z-index: 2;
+}
+
+h2 {
+    color: #036368;
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 3em;
+    /* margin-top: 50px; */
+    text-align: center;
+}
+
+form .login-info .login-form {
+    display: block;
+    /* width: 400px; */
+}
+
+.login-info .login-form label {
+    display: block;
+    color: rgb(64, 60, 60);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    transition: 0.4s;
+}
+
+.login-info .login-form:focus-within label {
+    color: #1EA786;
+}
+
+form .login-info .login-form input {
+    display: block;
+    margin-bottom: 1em;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #F8F8F8;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: 0.4s;
+}
+
+form .login-info .login-form input:focus {
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
+}
+
+form .login-info input[type="submit"] {
+    display: inline-block;
+    padding: 10px 10px;
+    margin-top: 1em;
+    margin-bottom: 3em;
+    margin-left: 3em;
+    width: 70%;
+    border-radius: 8px;
+    background-image: linear-gradient(to right, #1EA786 50%, #1EA786 50%, #6fbb75);
+    background-size: 200%;
+    background-position: 0%;
+    transition: 0.4s;
+    color: #FFF;
+    font-weight: 400;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+form .login-info input[type="submit"]:hover {
+    background-position: 100% 0%;
+}
+
+.register {
+    margin-bottom: 2em;
+    text-align: center;
+    color: rgb(79, 73, 73);
+}
+
+.register-btn {
+    color: #1EA786;
+    font-weight: 700;
+    margin: 0.3em;
+}
+
+.reset-password {
+    margin-top: 0.5em;
+    margin-left: 24em;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgb(188, 176, 176);
+}
+
+.login-info.box2 {
+    background-image: url(../images/bg.png);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    height: 500px;
+    width: 400px;
+    border-radius: 7px;
+}
+
+.login-info.box2 h3 {
+    color: #20AB8A;
+    margin-top: 8em;
+    text-align: center;
+    font-size: 25px;
+}
+
+.login-info.box2 p {
+    margin-top: 1em;
+    text-align: center;
+    font-size: 13px;
+}
+
+.container-login {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+form .container-login .logo-image {
+    background-image: url(../images/logo.png);
+    background-size: 100% 100%;
+    width: 55px;
+    height: 40px;
+}
+
+form .container-login .login-info.box2 {
+    padding-left: 20px;
+}
+
+form .container-login .login-info.box2 .container-fruits {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.login-info.box2 .container-fruits .avocado {
+    background-image: url(../images/avocado.png);
+    background-size: 100% 100%;
+    width: 50px;
+    height: 50px;
+    border-radius: 100px;
+    border: solid white 4px;
+}
+
+.login-info.box2 .container-fruits .kiwi {
+    background-image: url(../images/kiwi.png);
+    background-size: 110% 100%;
+    width: 50px;
+    height: 50px;
+    border-radius: 100px;
+    border: solid white 4px;
+}
+
+.login-info.box2 .container-fruits .strawberry {
+    background-image: url(../images/strawberry.png);
+    background-size: 100% 150%;
+    width: 60px;
+    height: 60px;
+    border-radius: 100px;
+    margin-top: 7em;
+    border: solid white 4px;
+}
+
+.login-info.box2 .container-fruits .blueberry {
+    background-image: url(../images/blueberry.jpg);
+    background-size: 170% 100%;
+    width: 70px;
+    height: 70px;
+    border-radius: 100px;
+    margin-top: 7em;
+    border: solid white 4px;
+}
+
+.login-info.box2 .container-fruits .peach {
+    background-image: url(../images/peach.png);
+    background-size: 100% 120%;
+    width: 60px;
+    height: 60px;
+    border-radius: 100px;
+    border: solid white 4px;
+    margin-top: 7em;
+}
+
+.error {
+    margin-top: 0.5em;
+    margin-left: 5em;
+    color: #a52e2e;
+}
+
+.error2 {
+    margin-top: 0.5em;
+    margin-left: 5em;
+    color: #FFFFFF;
+}
+
+h5 {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid rgb(188, 176, 176);
+    line-height: 0.1em;
+    margin-top: 1.8em;
+}
+
+h5 span {
+    color: rgb(188, 176, 176);
+    font-weight: 20px;
+    background: #fff;
+    padding: 0 10px;
+}
+
+.container-apps {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.google-login {
+    background: url(../images/google.png) no-repeat;
+    background-size: 100% 100%;
+    cursor: pointer;
+    border: none;
+    width: 20px;
+    height: 20px;
+}
+
+.facebook-login {
+    background: url(../images/facebook.png) no-repeat;
+    background-size: 100% 100%;
+    cursor: pointer;
+    border: none;
+    width: 20px;
+    height: 20px;
+}

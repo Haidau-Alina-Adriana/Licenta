@@ -1,0 +1,71 @@
+[{
+        "id": 1,
+        "name": "Kiwi",
+        "color": "#ecf7ce",
+        "description": "Kiwi is a fruit of ovoid shape, of variable size and covered with a brown fuzzy thin skin.",
+        "image_link": "/kiwi-fruit.png"
+    },
+    {
+        "id": 2,
+        "name": "Strawberry",
+        "color": "#fbf7d5",
+        "description": "The strawberry is a succulent and fragrant fruit of bright red colour, obtained from the plant with the same name.",
+        "image_link": "/strawberry-fruit.png"
+    },
+    {
+        "id": 3,
+        "name": "Avocado",
+        "color": "#caeaba",
+        "description": "The avocado is a fleshy exotic fruit, the skin is thick and tough, of a green colour and the tone depends on the variety.",
+        "image_link": "/avocado-fruit.png"
+    },
+    {
+        "id": 4,
+        "name": "Peach",
+        "color": "#feffc1",
+        "description": "The peach is a round, coloured, juicy fruit, typically eaten in summer. Many countries produce peaches.",
+        "image_link": "/peach-fruit.png"
+    },
+    {
+        "id": 5,
+        "name": "Pomegranate",
+        "color": "#f0d9d3",
+        "description": "Pomegranates are round, reddish-brown fruits with a hard, smooth exterior.",
+        "image_link": "/pomegranate-fruit.png"
+    },
+    {
+        "id": 6,
+        "name": "Mango",
+        "color": "#faebd7",
+        "description": "It has an ovoid shape, non-edible rind and variable colour, from of pale yellow to dark red.",
+        "image_link": "/mango-fruit.png"
+    },
+    {
+        "id": 7,
+        "name": "Pineapple",
+        "color": "#ffffc6",
+        "description": "Mature pineapples have a very singular fragrance, a beautiful colour and pleasant bittersweet taste.",
+        "image_link": "/pineapple-fruit.png"
+    },
+    {
+        "id": 8,
+        "name": "Coconut",
+        "color": "#eaedf2",
+        "description": "Coconut is a round and elongate fruit of white, fibrous and oily meat covered by a thick, brown and hairy shell.",
+        "image_link": "/coconut-fruit.png"
+    },
+    {
+        "id": 9,
+        "name": "Banana",
+        "color": "#d9edc9",
+        "description": "Is a lengthy yellow fruit, and its flavour is more or less sweet, depending on the variety.",
+        "image_link": "/banana-fruit.png"
+    },
+    {
+        "id": 10,
+        "name": "Watermelon",
+        "color": "#eae0d7",
+        "description": "The watermelon is a large fruit of a more or less spherical shape. It is usually eaten raw as table dessert.",
+        "image_link": "/watermelon-fruit.png"
+    }
+]
