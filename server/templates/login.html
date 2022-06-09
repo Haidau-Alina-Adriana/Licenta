@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Login</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div class="notification is-danger">
+            {{ messages[0] }}
+        </div>
+        {% endif %} {% endwith %}
+        <form method="POST" action="/login">
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                </div>
+            </div>
+            <div class="field">
+                <label class="checkbox">
+                    <input type="checkbox" name="remember">
+                    Remember me
+                </label>
+            </div>
+            <button class="button is-block is-info is-large is-fullwidth">Login</button>
+
+            <div className='login-with-other-apps'>
+                <h5><span>Or login with</span></h5>
+                <div className='container-apps'>
+                    <button className='google-login' type='submit' style="background: url(https://freesvg.org/img/1534129544.png) no-repeat; background-size: 100% 100%;
+                    cursor: pointer; border:none; width: 30px; height: 30px; border-radius: 15px;">
+                    </button>
+                    <button className='facebook-login' type='submit' style="background: url(https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/2048px-2021_Facebook_icon.svg.png) no-repeat; background-size: 100% 100%;
+                    cursor: pointer; border:none; width: 30px; height: 30px; border-radius: 15px;">
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
