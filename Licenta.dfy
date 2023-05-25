@@ -1,14 +1,16 @@
-datatype Problem = Problem(number_of_objects: int, knapsack_capacity: int, costs: seq<int>, weights: seq<int>)
+datatype Problem = Problem(numberOfObjects: int, knapsackCapacity: int, costs: seq<int>, weights: seq<int>)
 
-predicate has_positive_values(input: seq<int>)
+datatype Solution = Solution(profit: int, objects: seq<int>)
+
+predicate hasPositiveValues(input: seq<int>)
 {
     forall i :: 0 <= i < |input| ==> input[i] > 0
 }
 
-predicate is_valid_problem(p: Problem)
+predicate isValidProblem(p: Problem)
 {
-    |p.costs| == |p.weights| == p.number_of_objects && p.number_of_objects > 0 && p.knapsack_capacity > 0 && 
-          has_positive_values(p.costs) && has_positive_values(p.weights)
+    |p.costs| == |p.weights| == p.numberOfObjects && p.numberOfObjects > 0 && p.knapsackCapacity >= 0 && 
+          hasPositiveValues(p.costs) && hasPositiveValues(p.weights)
 }
 
 function max(p1: int, p2: int): int
@@ -16,112 +18,124 @@ function max(p1: int, p2: int): int
     if p1 > p2 then p1 else p2
 }
 
-function gain(s: seq<int>, c: seq<int>): int
-  requires |s| == |c| 
+function gain(solution: seq<int>, costs: seq<int>): int
+  requires |solution| == |costs| 
 {
-  if |s| == 0 then 0 else s[0] * c[0] + gain(s[1..], c[1..])
+  if |solution| == 0 then 0 else solution[0] * costs[0] + gain(solution[1..], costs[1..])
 }
 
-predicate is_solution(p: Problem, solution: seq<int>, profit: int)
-  requires |solution| == |p.costs| 
+predicate isValidSolution(p: Problem, solution: Solution)
 {
-  gain(solution, p.costs) == profit
+  |solution.objects| == p.numberOfObjects && 
+  forall k :: 0 <= k < |solution.objects| ==> solution.objects[k] == 0 || solution.objects[k] == 1
 }
 
-// predicate is_partial_solution(capacity: int, profit: int)
-// {
-
-// }
-
-predicate is_optimal_solution(p: Problem, solution: seq<int>, profit: int)
-  requires |solution| == |p.costs| 
+predicate isSolution(p: Problem, solution: Solution)
+  requires isValidProblem(p)
+  requires isValidSolution(p, solution) 
 {
-    is_solution(p, solution, profit) // && orice alta solutie are gain < profit
+  gain(solution.objects, p.costs) == solution.profit
 }
 
-method add_sequence(existing_seq: seq<seq<int>>, new_seq: seq<int>, c: int) returns (result: seq<seq<int>>)
-  requires |new_seq| == c
-  ensures result == existing_seq + [new_seq]
-  ensures |result| == |existing_seq| + 1
+predicate isPartialSolution(partialSolution: seq<int>)
 {
-  result := existing_seq + [new_seq];
+  forall s :: 1 <= s < |partialSolution| ==> partialSolution[s] >= partialSolution[s - 1]
 }
 
-method get_maxim_profit(p: Problem) returns (maxim_profit : int, profits: seq<seq<int>>, solution: seq<int>)
-  requires is_valid_problem(p)
-  ensures |profits| == p.number_of_objects + 1
-  ensures forall k :: 0 <= k <= p.number_of_objects ==> |profits[k]| == p.knapsack_capacity + 1
-  // ensures is_solution(p, solution)
+predicate isOptimalSolution(p: Problem, solution: Solution)
+  requires isValidProblem(p)
+  requires isValidSolution(p, solution)  
 {
-    profits := []; 
-    maxim_profit := 0;
+    isSolution(p, solution) && 
+    forall x: int :: forall s: seq<int> :: ((isValidSolution(p, Solution(x, s)) && isSolution(p, Solution(x, s))) ==> 
+    gain(s, p.costs) >= gain(s, p.costs))
+}
+
+method addSequence(existingSeq: seq<seq<int>>, newSeq: seq<int>, c: int) returns (result: seq<seq<int>>)
+  requires |newSeq| == c
+  ensures result == existingSeq + [newSeq]
+  ensures |result| == |existingSeq| + 1
+{
+  result := existingSeq + [newSeq];
+}
+
+method getMaximProfit(p: Problem) returns (solution: Solution)
+  requires isValidProblem(p)
+  // ensures isSolution(p, solution)
+{
+    var profits := []; 
+    var maximProfit := 0;
+    var partialProfits := [];
     
     var i := 0;
-    while i <= p.number_of_objects 
-      invariant 0 <= i <= p.number_of_objects + 1
+    while i <= p.numberOfObjects 
       invariant |profits| == i
-      invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsack_capacity + 1
+      invariant 0 <= i <= p.numberOfObjects + 1
+      invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
+      // invariant forall j :: 0 <= j < i ==> isPartialSolution(partialProfits)
     {
-        var partial_profits := get_partial_profits(p, profits,i);
-        profits := add_sequence(profits, partial_profits, p.knapsack_capacity + 1);
+        partialProfits := getPartialProfits(p, profits,i);
+        profits := addSequence(profits, partialProfits, p.knapsackCapacity + 1);
         i := i + 1;
     }
 
-    maxim_profit := profits[p.number_of_objects][p.knapsack_capacity];
+    maximProfit := profits[p.numberOfObjects][p.knapsackCapacity];
 
-    solution := get_knapsack_objects(p, profits, maxim_profit);
+    var objects := getKnapsackObjects(p, profits, maximProfit);
+
+    solution := Solution(maximProfit, objects);
 }
 
-method get_partial_profits(p: Problem, profits: seq<seq<int>>, i: int) returns (partial_profits: seq<int>)
-  requires is_valid_problem(p)
+method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (partialProfits: seq<int>)
+  requires isValidProblem(p)
   requires |profits| == i
-  requires 0 <= i < p.number_of_objects + 1
-  requires forall k :: 0 <= k < i ==> |profits[k]| == p.knapsack_capacity + 1
-  ensures |partial_profits| == p.knapsack_capacity + 1
+  requires 0 <= i < p.numberOfObjects + 1
+  requires forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
+  ensures |partialProfits| == p.knapsackCapacity + 1
+  // ensures isSolution(p, solution, maximProfit)
 {
-        partial_profits := [];
+        partialProfits := [];
         var j := 0;
-        while j <= p.knapsack_capacity
-          invariant 0 <= i <= p.number_of_objects + 1 
-          invariant 0 <= j <= p.knapsack_capacity + 1
-          invariant |partial_profits| == j
+        while j <= p.knapsackCapacity
+          invariant 0 <= j <= p.knapsackCapacity + 1
+          invariant |partialProfits| == j
+          // invariant isPartialSolution(partialProfits)
         {
           if i == 0 || j == 0 {
-              partial_profits := partial_profits + [0];
+              partialProfits := partialProfits + [0];
           } else {
             if p.weights[i - 1] <= j {
-              partial_profits := partial_profits + [max(p.costs[i - 1] + profits[i - 1][j - p.weights[i - 1]], profits[i - 1][j])];
+              partialProfits := partialProfits + [max(p.costs[i - 1] + profits[i - 1][j - p.weights[i - 1]], profits[i - 1][j])];
             } else {
-              partial_profits := partial_profits + [profits[i - 1][j]];
+              partialProfits := partialProfits + [profits[i - 1][j]];
             }
           }
           j := j + 1;
         }
 }
 
-method get_knapsack_objects(p: Problem, profits: seq<seq<int>>, maxim_profit: int) returns (solution: seq<int>)
-  requires is_valid_problem(p)
-  requires |profits| == p.number_of_objects + 1
-  requires forall k :: 0 <= k <= p.number_of_objects ==> |profits[k]| == p.knapsack_capacity + 1
-  ensures |solution| == p.number_of_objects == |p.weights| == |p.costs|
-  // ensures is_solution(p, solution)
+method getKnapsackObjects(p: Problem, profits: seq<seq<int>>, maximProfit: int) returns (objectHasBeenAdded: seq<int>)
+  requires isValidProblem(p)
+  requires |profits| == p.numberOfObjects + 1
+  requires forall k :: 0 <= k <= p.numberOfObjects ==> |profits[k]| == p.knapsackCapacity + 1
+  // ensures isSolution(p, solution)
 {
-    solution := [];
-    var i := p.number_of_objects;
-    var j := p.knapsack_capacity;
+    objectHasBeenAdded := [];
+    var i := p.numberOfObjects;
+    var j := p.knapsackCapacity;
 
     while i > 0 && j >= 0
-      invariant 0 <= i <= p.number_of_objects
-      invariant 0 <= j <= p.knapsack_capacity
-      invariant |solution| == p.number_of_objects - i
+      invariant 0 <= i <= p.numberOfObjects
+      invariant 0 <= j <= p.knapsackCapacity
+      invariant |objectHasBeenAdded| == p.numberOfObjects - i
       decreases i
       decreases j
     {
       if profits[i][j] == profits[i - 1][j] {
-        solution := [0] + solution;
+        objectHasBeenAdded := [0] + objectHasBeenAdded;
         i := i - 1;
       } else { 
-        solution := [1] + solution;
+        objectHasBeenAdded := [1] + objectHasBeenAdded;
         i := i - 1;
         if j - p.weights[i] >= 0 {
           j := j - p.weights[i];
@@ -129,15 +143,16 @@ method get_knapsack_objects(p: Problem, profits: seq<seq<int>>, maxim_profit: in
         
       }
     }
-    assert |solution| == |p.weights|;
+    // assert |objectHasBeenAdded| == |p.weights|;
 }
 
 method Main()
 {
-    var problem: Problem := Problem(number_of_objects := 4, knapsack_capacity := 8, costs := [1, 2, 5, 6], weights := [2, 3, 4, 5]);
-    var maxim_profit, profits, solution := get_maxim_profit(problem);
+    var problem: Problem := Problem(numberOfObjects := 4, knapsackCapacity := 8, 
+                                    costs := [1, 2, 5, 6], weights := [2, 3, 4, 5]);
+    var solution := getMaximProfit(problem);
 
     print "Maxim profit: ";
-    print maxim_profit;
+    print solution.profit;
     print "\n";
 }
