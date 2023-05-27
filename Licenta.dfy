@@ -46,9 +46,9 @@ predicate isOptimalSolution(p: Problem, solution: Solution)
   requires isValidProblem(p)
   requires isValidSolution(p, solution)  
 {
-    isSolution(p, solution) && 
-    forall x: int :: forall s: seq<int> :: ((isValidSolution(p, Solution(x, s)) && isSolution(p, Solution(x, s))) ==> 
-    gain(s, p.costs) >= gain(s, p.costs))
+    isSolution(p, solution) &&
+    forall s : Solution :: ((isSolution(p, s) && isValidSolution(p, s)) 
+    ==> gain(solution.objects, p.costs) >= gain(s.objects, p.costs))
 }
 
 method addSequence(existingSeq: seq<seq<int>>, newSeq: seq<int>, c: int) returns (result: seq<seq<int>>)
