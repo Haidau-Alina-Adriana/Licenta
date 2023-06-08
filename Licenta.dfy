@@ -12,7 +12,8 @@ function max(p1: int, p2: int): int
 
 function gain(problem: Problem, solution: seq<int>): int
   requires isValidProblem(problem)
-  requires isValidPartialSolution(problem, solution)
+  requires 0 <= |solution| <= problem.numberOfObjects
+  // requires isValidPartialSolution(problem, solution)
 {
   if |solution| == 0 then 0 else computeGain(problem.gains, solution, |solution| - 1)
 }
@@ -22,11 +23,6 @@ function computeGain(gains: seq<int>, solution: seq<int>, i: int) : int
   requires 0 <= i < |gains|
 {
    if i == 0 then 0 else solution[i] * gains[i] + computeGain(gains, solution, i - 1)
-}
-
-function intermediaryPartialSolution(seq1: seq<int>, seq2: seq<int>) : int
-{
-  if |seq1| == 0 || |seq2| == 0 then 0 else seq1[0] * seq2[0] + intermediaryPartialSolution(seq1[1..], seq2[1..])
 }
 
 function weight(problem: Problem, solution: seq<int>): int
@@ -76,16 +72,21 @@ predicate isPartialSolution(problem: Problem, solution: seq<int>)
   weight(problem, solution) < problem.knapsackCapacity
 }
 
-predicate isPartialSolutionOfProfitN(p: Problem, profits: seq<seq<int>>, x: int, y: int, n: int)
-{
-  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && profits[x - 1][y] == n)
-  //  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && exists a: int :: profits[x - 1][y] == a)
-}
-
-// predicate isCompleteSolutionOfProfitX()
+// ghost predicate isPartialSolutionOfProfitN(p: Problem, profits: seq<seq<int>>, dimension: int, weigth: int)
+//   requires 0 <= dimension <= |profits|
+//   requires dimension > 0 ==> (0 <= weight < |profits[dimension - 1]|)
+//   requires isValidProblem(p)
 // {
-  
+//   // exists sol :: seq<int> ==> gain(p, )
+//   //  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && exists a :: profits[x - 1][y] == a)
 // }
+
+ghost predicate isPartialSolutionOfProfitN(p: Problem, partialProfit: int)
+  requires isValidProblem(p)
+{
+  exists sol : seq<int> :: (hasPositiveValues(sol) && 0 <= |sol| <= p.numberOfObjects && gain(p, sol) == partialProfit)
+  //  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && exists a :: profits[x - 1][y] == a)
+}
 
 ghost predicate isOptimalSolution(problem: Problem, solution: seq<int>)
   requires isValidProblem(problem)
@@ -94,6 +95,11 @@ ghost predicate isOptimalSolution(problem: Problem, solution: seq<int>)
     isSolution(problem, solution) &&
     forall s: seq<int> :: (((isValidSolution(problem, s) && isSolution(problem, s)) ==> 
     gain(problem, solution) >= gain(problem, s)))
+}
+
+predicate hasOnlyRequiredValues(solution: seq<int>)
+{
+  forall k :: 0 <= k < |solution| ==> solution[k] == 0 || solution[k] == 1
 }
 
 method addSequence(existingSeq: seq<seq<int>>, newSeq: seq<int>, c: int) returns (result: seq<seq<int>>)
@@ -106,33 +112,28 @@ method addSequence(existingSeq: seq<seq<int>>, newSeq: seq<int>, c: int) returns
 
 method getMaximProfit(p: Problem) returns (solution: seq<int>)
   requires isValidProblem(p)
+  ensures hasOnlyRequiredValues(solution)
   // ensures isValidSolution(p, solution)
   // ensures isSolution(p, solution)
 {
     var profits := []; 
     var maximProfit := 0;
-    
-    var partSol := getKnapsackObjects(p, profits);
-    var N := intermediaryPartialSolution(partSol, p.gains); 
 
     var i := 0;
     while i <= p.numberOfObjects 
       invariant |profits| == i
       invariant 0 <= i <= p.numberOfObjects + 1
-      invariant |profits| <= p.numberOfObjects + 1
       invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
-      invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
-        isPartialSolutionOfProfitN(p, profits, x, y, N)
+      // invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
+      //   isPartialSolutionOfProfitN(p, profits, x, y)
     {
         var partialProfits := getPartialProfits(p, profits, i);
         profits := addSequence(profits, partialProfits, p.knapsackCapacity + 1);
-        i := i + 1;
-
-        partSol := getKnapsackObjects(p, profits);
-        N := intermediaryPartialSolution(partSol, p.gains); 
+        i := i + 1; 
     }
 
     maximProfit := profits[p.numberOfObjects][p.knapsackCapacity];
+    assert (|profits| == p.numberOfObjects + 1);
 
     solution := getKnapsackObjects(p, profits);
 }
@@ -148,13 +149,11 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
         partialProfits := [];
         var j := 0;
 
-        var partSol := getKnapsackObjects(p, profits);
-        var N := intermediaryPartialSolution(partSol, p.gains); 
-
         while j <= p.knapsackCapacity
           invariant 0 <= j <= p.knapsackCapacity + 1
           invariant |partialProfits| == j
-          invariant forall y :: 0 <= y < j ==> isPartialSolutionOfProfitN(p, profits, i, y, N)
+          invariant |partialProfits| > 0 ==> 
+          (forall y :: 0 <= y < |partialProfits| ==> (isPartialSolutionOfProfitN(p, partialProfits[y])))
         {
           if i == 0 || j == 0 {
               partialProfits := partialProfits + [0];
@@ -166,8 +165,6 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
             }
           }
           j := j + 1;
-          partSol := getKnapsackObjects(p, profits);
-          N := intermediaryPartialSolution(partSol, p.gains); 
         }
 }
 
@@ -206,17 +203,19 @@ method getKnapsackObjects(p: Problem, profits: seq<seq<int>>) returns (solution:
     requires isValidProblem(p)
     requires forall k :: 0 <= k < |profits| ==> |profits[k]| == p.knapsackCapacity + 1
     requires |profits| <= |p.weights| + 1
+    ensures hasOnlyRequiredValues(solution)
+    ensures 0 <= |solution| <= |profits| - 1
 {
     solution := [];
     var i := |profits| - 1;
     var j := p.knapsackCapacity;
 
     while i > 0 && j >= 0
-      invariant -1 <= i <= |profits|
-      invariant 0 <= j <= p.knapsackCapacity
+      invariant -1 <= i <= |profits| - 1
       invariant -1 <= i <= |p.weights|
-      invariant |solution| <= p.numberOfObjects - i
-      invariant isPartialSolution(p, solution)
+      invariant 0 <= j <= p.knapsackCapacity
+      // invariant isPartialSolution(p, solution)
+      invariant hasOnlyRequiredValues(solution)
       decreases i
       decreases j
     {
