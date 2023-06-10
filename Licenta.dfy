@@ -72,20 +72,39 @@ predicate isPartialSolution(problem: Problem, solution: seq<int>)
   weight(problem, solution) < problem.knapsackCapacity
 }
 
-// ghost predicate isPartialSolutionOfProfitN(p: Problem, profits: seq<seq<int>>, dimension: int, weigth: int)
-//   requires 0 <= dimension <= |profits|
-//   requires dimension > 0 ==> (0 <= weight < |profits[dimension - 1]|)
-//   requires isValidProblem(p)
-// {
-//   // exists sol :: seq<int> ==> gain(p, )
-//   //  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && exists a :: profits[x - 1][y] == a)
-// }
-
-ghost predicate isPartialSolutionOfProfitN(p: Problem, partialProfit: int)
+ghost predicate isPartialSolutionOfCoordinates(p: Problem, profits: seq<seq<int>>, partialProfits: seq<int>, dim: int, weight: int)
   requires isValidProblem(p)
 {
-  exists sol : seq<int> :: (hasPositiveValues(sol) && 0 <= |sol| <= p.numberOfObjects && gain(p, sol) == partialProfit)
-  //  0 <= x <= |profits| && (x > 0 ==> 0 <= y < |profits[x - 1]| && exists a :: profits[x - 1][y] == a)
+  checkCaseOne(p, profits, partialProfits, dim, weight) || checkCaseTwo(p, profits, partialProfits, dim, weight) ||
+  checkCaseThree(p, profits, partialProfits, dim, weight)
+}
+
+ghost predicate checkCaseOne(p: Problem, profits: seq<seq<int>>, partialProfits: seq<int>, dim: int, weight: int)
+{
+  |profits| == 0 && dim == 0 && 0 <= weight <= p.knapsackCapacity
+  && forall k :: 0 <= k < |partialProfits| ==> partialProfits[k] == 0
+}
+
+ghost predicate checkCaseTwo(p: Problem, profits: seq<seq<int>>, partialProfits: seq<int>, dim: int, weight: int)
+  requires isValidProblem(p)
+{
+  |profits| == 1 ==> (dim == 1 && 0 <= weight <= p.knapsackCapacity && 0 <= weight < |partialProfits|
+  && existsGain(p, partialProfits[weight]))
+}
+
+ghost predicate checkCaseThree(p: Problem, profits: seq<seq<int>>, partialProfits: seq<int>, dim: int, weight: int)
+  requires isValidProblem(p)
+{
+  |profits| > 1 ==> (dim == |profits| && 0 <= weight <= p.knapsackCapacity && 0 <= weight < |partialProfits|
+  && existsGain(p, partialProfits[weight]))
+}
+
+
+
+ghost predicate existsGain(p: Problem, profit: int)
+  requires isValidProblem(p)
+{
+  exists sol : seq<int> :: isValidPartialSolution(p, sol) && gain(p, sol) == profit
 }
 
 ghost predicate isOptimalSolution(problem: Problem, solution: seq<int>)
@@ -124,8 +143,9 @@ method getMaximProfit(p: Problem) returns (solution: seq<int>)
       invariant |profits| == i
       invariant 0 <= i <= p.numberOfObjects + 1
       invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
+      invariant 0 <= |profits| <= p.numberOfObjects + 1
       // invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
-      //   isPartialSolutionOfProfitN(p, profits, x, y)
+      //   isPartialSolutionOfProfit(p, profits, x, y)
     {
         var partialProfits := getPartialProfits(p, profits, i);
         profits := addSequence(profits, partialProfits, p.knapsackCapacity + 1);
@@ -144,16 +164,19 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
   requires 0 <= i < p.numberOfObjects + 1
   requires forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
   ensures |partialProfits| == p.knapsackCapacity + 1
+  ensures 0 <= |profits| <= p.numberOfObjects + 1
   // ensures isSolution(p, solution)
+  ensures forall y :: 0 <= y < |partialProfits| ==> (isPartialSolutionOfCoordinates(p, profits, partialProfits, i, y))
 {
         partialProfits := [];
         var j := 0;
 
         while j <= p.knapsackCapacity
           invariant 0 <= j <= p.knapsackCapacity + 1
+          invariant 0 <= |profits| <= p.numberOfObjects + 1
           invariant |partialProfits| == j
           invariant |partialProfits| > 0 ==> 
-          (forall y :: 0 <= y < |partialProfits| ==> (isPartialSolutionOfProfitN(p, partialProfits[y])))
+        (forall y :: 0 <= y < |partialProfits| ==> (isPartialSolutionOfCoordinates(p, profits, partialProfits, i, y)))
         {
           if i == 0 || j == 0 {
               partialProfits := partialProfits + [0];
@@ -199,26 +222,36 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
 //     }
 // }
 
+predicate solIncreasedByOne(oldSol: seq<int>, newSol: seq<int>)
+{
+  |newSol| > 0 ==> |newSol| == |oldSol| + 1
+}
+
 method getKnapsackObjects(p: Problem, profits: seq<seq<int>>) returns (solution: seq<int>)
     requires isValidProblem(p)
+    requires 0 <= |profits| <= p.numberOfObjects + 1
     requires forall k :: 0 <= k < |profits| ==> |profits[k]| == p.knapsackCapacity + 1
     requires |profits| <= |p.weights| + 1
     ensures hasOnlyRequiredValues(solution)
-    ensures 0 <= |solution| <= |profits| - 1
+    ensures |profits| > 0 ==> 0 <= |solution| < |profits|
 {
     solution := [];
     var i := |profits| - 1;
     var j := p.knapsackCapacity;
+    var oldSol := solution;
 
     while i > 0 && j >= 0
       invariant -1 <= i <= |profits| - 1
       invariant -1 <= i <= |p.weights|
       invariant 0 <= j <= p.knapsackCapacity
+      invariant |profits| > 0 ==> (|solution| < |profits| - i  && 0 <= |solution| < |profits|)
+      invariant |profits| > 0 ==> 0 <= |solution| < |profits|
       // invariant isPartialSolution(p, solution)
       invariant hasOnlyRequiredValues(solution)
       decreases i
       decreases j
     {
+      oldSol := solution;
       if profits[i][j] == profits[i - 1][j] {
         solution := [0] + solution;
         i := i - 1;
