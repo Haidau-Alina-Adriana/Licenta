@@ -70,35 +70,21 @@ predicate isPartialSolution(problem: Problem, solution: seq<int>)
   weight(problem, solution) <= problem.knapsackCapacity
 }
 
-ghost predicate isPartialSolutionOfCoordinates(p: Problem, profits: seq<seq<int>>, partialProfits: seq<int>, dim: int, weight: int)
+ghost predicate isPartialSolutionOfCoordinates(p: Problem, partialProfit: int, dim: int, partWeight: int, matrixLength: int)
   requires isValidProblem(p)
-  requires 0 <= weight <= p.knapsackCapacity && 0 <= weight < |partialProfits|
-  requires |profits| == 0 ==> dim == 0
-  requires |profits| == 1 ==> dim == 1
-  requires |profits| > 1 ==> dim == |profits|
+  requires 0 <= partWeight <= p.knapsackCapacity
+  requires 0 <= dim <= p.numberOfObjects
+  requires matrixLength == dim
 {
-  forall k :: 0 <= k < |partialProfits| ==> 
-  (existsGain(p, partialProfits[k]) && existsPartialWeigth(p, weight))
+  exists sol : seq<int> :: isValidPartialSolution(p, sol) && gain(p, sol) == partialProfit && weight(p, sol) == partWeight
 }
 
-ghost predicate isPartialSolutionOfProfit(p: Problem, profits: seq<seq<int>>, dim: int, weight: int)
+ghost predicate isPartialSolutionOfProfit(p: Problem, profit: int, dim: int, partWeight: int)
   requires isValidProblem(p)
-  requires |profits| == 0 || (0 <= dim < |profits| && 0 <= dim < p.numberOfObjects + 1 &&
-   0 <= weight < |profits[dim]| && 0 <= weight < p.knapsackCapacity + 1)
+  requires 0 <= dim <= p.numberOfObjects
+  requires 0 <= partWeight <= p.knapsackCapacity
 {
-   0 <= dim < |profits| && existsGain(p, profits[dim][weight]) && existsPartialWeigth(p, weight)
-}
-
-ghost predicate existsGain(p: Problem, profit: int)
-  requires isValidProblem(p)
-{
-  exists sol : seq<int> :: isValidPartialSolution(p, sol) && gain(p, sol) == profit
-}
-
-ghost predicate existsPartialWeigth(p: Problem, partialWeight: int)
-  requires isValidProblem(p)
-{
-  exists sol : seq<int> :: isValidPartialSolution(p, sol) && weight(p, sol) == partialWeight
+  exists sol : seq<int> :: (isValidPartialSolution(p, sol) && gain(p, sol) == profit && weight(p, sol) == partWeight)
 }
 
 ghost predicate isOptimalSolution(problem: Problem, solution: seq<int>)
@@ -139,8 +125,8 @@ method getMaximProfit(p: Problem) returns (solution: seq<int>)
       invariant 0 <= i <= p.numberOfObjects + 1
       invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
       invariant 0 <= |profits| <= p.numberOfObjects + 1
-      // invariant |profits| > 0 ==> (forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
-      //   isPartialSolutionOfProfit(p, profits, x, y))
+      invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
+        isPartialSolutionOfProfit(p, profits[x][y], x, y)
     {
         partialProfits := getPartialProfits(p, profits, i);
         profits := addSequence(profits, partialProfits, p.knapsackCapacity + 1);
@@ -158,7 +144,8 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
   requires forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
   ensures |partialProfits| == p.knapsackCapacity + 1
   ensures 0 <= |profits| <= p.numberOfObjects + 1
-  // ensures forall y :: 0 <= y < |partialProfits| ==> (isPartialSolutionOfCoordinates(p, profits, partialProfits, i, y))
+  ensures forall y :: 0 <= y < |partialProfits| ==>
+           (isPartialSolutionOfCoordinates(p, partialProfits[y], i, y, |profits|))
 {
         partialProfits := [];
         var j := 0;
@@ -167,12 +154,9 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, i: int) returns (pa
           invariant 0 <= j <= p.knapsackCapacity + 1
           invariant 0 <= |profits| <= p.numberOfObjects + 1
           invariant |partialProfits| == j
-        //   invariant |partialProfits| > 0 ==> 
-        // (forall y :: 0 <= y < |partialProfits| ==> (existsGain(p, partialProfits[y])))
-        // invariant |partialProfits| > 0 ==> 
-        // (forall y :: 0 <= y < |partialProfits| ==> (existsPartialWeigth(p, y)))
+          invariant forall y :: 0 <= y < |partialProfits| ==>
+           (isPartialSolutionOfCoordinates(p, partialProfits[y], i, y, |profits|))
         {
-          // assert isPartialSolutionOfCoordinates(p, profits, partialProfits, 0, 0);
           if i == 0 || j == 0 {
               partialProfits := partialProfits + [0];
           } else {
@@ -196,15 +180,14 @@ method getKnapsackObjects(p: Problem, profits: seq<seq<int>>) returns (solution:
     solution := [];
     var i := |profits| - 1;
     var j := p.knapsackCapacity;
-    while i > 0 && j >= 0
+    while i > 0 && j > 0
       invariant -1 <= i <= |profits| - 1
       invariant -1 <= i <= |p.weights|
       invariant 0 <= j <= p.knapsackCapacity
       invariant |profits| > 0 ==> (|solution| < |profits| - i  && 0 <= |solution| <= |profits|)
       invariant hasOnlyPermittedValues(solution)
       invariant isValidPartialSolution(p, solution)
-      // invariant forall y :: 0 <= y < |solution| ==> (weight(p, solution) <= p.knapsackCapacity)
-      invariant isPartialSolution(p, solution)
+      // invariant isPartialSolution(p, solution)
       decreases i
       decreases j
     {
