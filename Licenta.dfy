@@ -95,13 +95,13 @@ predicate isPartialSolution(problem: Problem, solution: seq<int>)
   weight(problem, solution) <= problem.knapsackCapacity
 }
 
-ghost predicate existsPartialSolutionOfProfit(p: Problem, profit: int, dim: int, partWeight: int)
+ghost predicate existsPartialSolutionOfProfit(p: Problem, profit: int, dim: int, partWeight: int, partialSolution: seq<int>)
   requires isValidProblem(p)
   requires 0 <= dim <= p.numberOfObjects
   requires 0 <= partWeight <= p.knapsackCapacity
 {
-  exists sol : seq<int> :: (isValidPartialSolution(p, sol) && isPartialSolution(p, sol) 
-  && gain(p, sol) == profit && weight(p, sol) <= partWeight && |sol| == dim)
+  isValidPartialSolution(p, partialSolution) && isPartialSolution(p, partialSolution) 
+  && gain(p, partialSolution) == profit && weight(p, partialSolution) <= partWeight && |partialSolution| == p.numberOfObjects
 }
 
 // ghost predicate isOptimalSolution(problem: Problem, solution: seq<int>)
@@ -137,60 +137,131 @@ method getMaximProfit(p: Problem)
       invariant 0 <= i <= p.numberOfObjects + 1
       invariant forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
       invariant 0 <= |profits| <= p.numberOfObjects + 1
-      invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
-        existsPartialSolutionOfProfit(p, profits[x][y], x, y)
+
+      invariant |partialSolutions| == i
+      invariant forall k :: 0 <= k < i ==> |partialSolutions[k]| == p.knapsackCapacity + 1
+      invariant forall k :: 0 <= k < i ==> forall q :: 0 <= q < |partialSolutions[k]| ==> |partialSolutions[k][q]| == p.numberOfObjects 
+      // invariant forall x :: 0 <= x < i ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
+      //   existsPartialSolutionOfProfit(p, profits[x][y], x, y)
     {
-        var partialProfits := getPartialProfits(p, profits, partialSolutions, i);
+        var partialProfits, helpVar := getPartialProfits(p, profits, partialSolutions, i);
         profits := addSequence(profits, partialProfits, p.knapsackCapacity + 1);
+        partialSolutions := partialSolutions + [helpVar];
         i := i + 1; 
     }
     
     maximProfit := profits[p.numberOfObjects][p.knapsackCapacity];
+    print maximProfit;
+    print "\n";
+
+    for i: int := 0 to |partialSolutions|
+    { 
+      print partialSolutions[i];
+      print "\n";
+    }
     // solution := getKnapsackObjects(p, profits);
 }
 
-method getPartialProfits(p: Problem, profits: seq<seq<int>>, partialSolutions : seq<seq<seq<int>>>,i: int) returns (partialProfits: seq<int>)
+method getPartialProfits(p: Problem, profits: seq<seq<int>>, partialSolutions : seq<seq<seq<int>>>, i: int) returns (partialProfits: seq<int>, helpVar: seq<seq<int>>)
   requires isValidProblem(p)
   requires |profits| == i
   requires 0 <= i < p.numberOfObjects + 1
   requires 0 <= |profits| <= p.numberOfObjects + 1
   requires forall k :: 0 <= k < i ==> |profits[k]| == p.knapsackCapacity + 1
 
-  requires forall x :: 0 <= x < i - 1 ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
-        existsPartialSolutionOfProfit(p, profits[x][y], x, y)
+  requires |partialSolutions| == i
+  requires 0 <= |partialSolutions| <= p.numberOfObjects + 1
+  requires forall k :: 0 <= k < i ==> |partialSolutions[k]| == p.knapsackCapacity + 1
+  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |partialSolutions[k]| ==> |partialSolutions[k][q]| == p.numberOfObjects 
 
+  // requires forall x :: 0 <= x < i - 1 ==> forall y :: 0 <= y <= p.knapsackCapacity ==> 
+  //       existsPartialSolutionOfProfit(p, profits[x][y], x, y)
+
+  ensures |helpVar| == p.knapsackCapacity + 1
   ensures |partialProfits| == p.knapsackCapacity + 1
   ensures 0 <= |profits| <= p.numberOfObjects + 1 
-  ensures forall y :: 0 <= y < |partialProfits| ==>
-           (existsPartialSolutionOfProfit(p, partialProfits[y], i, y))
+  ensures forall k :: 0 <= k < |helpVar| ==> |helpVar[k]| == p.numberOfObjects
+  // ensures forall y :: 0 <= y < |partialProfits| ==>
+  //          (existsPartialSolutionOfProfit(p, partialProfits[y], i, y))
 {
         partialProfits := [];
         var j := 0;
-        var partialSolution := [];
+        var result := [];
+        var currentSolution := [];
+        helpVar := [];
 
         while j <= p.knapsackCapacity
           invariant 0 <= j <= p.knapsackCapacity + 1
           invariant 0 <= |profits| <= p.numberOfObjects + 1
           invariant |partialProfits| == j
-          invariant forall y :: 0 <= y < |partialProfits| ==>
-           (existsPartialSolutionOfProfit(p, partialProfits[y], i, y))
+          invariant 0 <= i <= |partialSolutions|
+          invariant |helpVar| == j
+
+          invariant forall k :: 0 <= k < i ==> |partialSolutions[k]| == p.knapsackCapacity + 1
+          invariant forall k :: 0 <= k < i ==> forall q :: 0 <= q < |partialSolutions[k]| ==> |partialSolutions[k][q]| == p.numberOfObjects 
+          invariant |helpVar| > 0 ==> forall k :: 0 <= k < |helpVar| ==> |helpVar[k]| == p.numberOfObjects 
+          // invariant forall k :: 0 <= k < i ==> 0 <= j <= |partialSolutions[k]|
+          // invariant forall y :: 0 <= y < |partialProfits| ==>
+          //  (existsPartialSolutionOfProfit(p, partialProfits[y], i, y, currentSolution))
         {
           if i == 0 || j == 0 {
               partialProfits := partialProfits + [0];
-              partialSolution := seq(p.numberOfObjects, w => 0);
+              currentSolution := seq(p.numberOfObjects, w => 0);
+
+              assert |currentSolution| == p.numberOfObjects;
+              // assert weight(p, currentSolution) <= p.numberOfObjects;
+
+              helpVar := helpVar + [currentSolution];
+              // assert isValidPartialSolution(p, currentSolution);
+              // assert isPartialSolution(p, currentSolution);
+              // assert gain(p, currentSolution) == 0; 
+              // assert weight(p, currentSolution) <= j; 
+              // assert|currentSolution| == p.numberOfObjects;
+              // assert existsPartialSolutionOfProfit(p, partialProfits[j], i, j, currentSolution);
           } else {
             if p.weights[i - 1] <= j {
+              if p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]] > profits[i - 1][j] {
+                var currentSolution := partialSolutions[i - 1][j - p.weights[i - 1]];
+                assert |currentSolution| == p.numberOfObjects;
+                currentSolution := currentSolution[i - 1 := 1];
+                helpVar := helpVar + [currentSolution];
+              } else {
+                var currentSolution := partialSolutions[i - 1][j];
+                assert |currentSolution| == p.numberOfObjects;
+                helpVar := helpVar + [currentSolution];
+              }
+
               partialProfits := partialProfits + [max(p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]], profits[i - 1][j])];
+              result := [];
+              result := profits + [partialProfits];
+              // currentSolution := getPartialSolution(p, result);
+              // assert isValidPartialSolution(p, currentSolution);
+              // assert weight(p, currentSolution) <= p.knapsackCapacity;
+              // assert isPartialSolution(p, currentSolution);
+              // assert gain(p, currentSolution) == 0; 
+              // assert weight(p, currentSolution) <= j; 
+              // assert|currentSolution| == p.numberOfObjects;
             } else {
               partialProfits := partialProfits + [profits[i - 1][j]];
+              result := [];
+              result := profits + [partialProfits];
+
+              var currentSolution := partialSolutions[i - 1][j];
+              assert |currentSolution| == p.numberOfObjects;
+              helpVar := helpVar + [currentSolution];
+              // currentSolution := getPartialSolution(p, result);
+              // assert isValidPartialSolution(p, currentSolution);
+              // assert isPartialSolution(p, currentSolution);
+              // assert gain(p, currentSolution) == 0; 
+              // assert weight(p, currentSolution) <= j; 
+              // assert|currentSolution| == p.numberOfObjects;
             }
           }
-          // partialSolutions := partialSolutions + [partialSolution];
           j := j + 1;
         }
 }
 
-lemma isPartialSolutionLemma(p: Problem, sol: seq<int>)
+lemma weightOfSol(p: Problem, sol: seq<int>)
   requires isValidProblem(p)
   // requires isValidPartialSolution(p, sol)
   requires forall i :: 0 <= i < |sol| ==> sol[i] == 0
@@ -205,31 +276,34 @@ lemma isPartialSolutionLemma(p: Problem, sol: seq<int>)
   // } else {
   //   // assume computeWeight(p.weights, sol, |sol[..|sol| - 1]|) == if |sol[..|sol| - 1]| == 0 then 0 else sol[|sol[..|sol| - 1]|] * p.weights[|sol[..|sol| - 1]|] + computeWeight(p.weights, sol, |sol[..|sol| - 1]| - 1);
   //   // assume weight(p, sol[..|sol| - 1]) <= if |sol| == 0 then 0 else computeWeight(p.weights, sol, |sol| - 1);
-  //   // isPartialSolutionLemma(p, sol[..|sol| - 1]);
+  //   // weightOfSol(p, sol[..|sol| - 1]);
   //   // assert weight(p, sol[..|sol| - 1]) <= p.knapsackCapacity;
   //   assert computeWeight(p.weights, sol, |sol| - 1) == if |sol| == 0 then 0 else sol[|sol| - 1] * p.weights[|sol| - 1] + computeWeight(p.weights, sol, |sol| - 1);
   //   assert weight(p, sol) <= if |sol| == 0 then 0 else computeWeight(p.weights, sol, |sol| - 1);
-  //   isPartialSolutionLemma(p, sol[1..]);
+  //   weightOfSol(p, sol[1..]);
   //   assert [sol[0]] + sol[1..] == sol;
   //   assert weight(p, [sol[0]]) + weight(p, sol[1..]) == weight(p, sol);
   //   assert weight(p, sol[1..]) <= p.knapsackCapacity;
   // }
 }
 
-// lemma gainOfSol(p: Problem, sol: seq<int>, partialProfit: int)
-//   requires isValidProblem(p)
-//   requires isValidPartialSolution(p, sol)
-//   requires forall i :: 0 <= i < |sol| ==> sol[i] == 0
-//   ensures gain(p, sol) == partialProfit
-// {
+lemma gainOfSol(p: Problem, sol: seq<int>, partialProfit: int)
+  requires isValidProblem(p)
+  // requires isValidPartialSolution(p, sol)
+  requires forall i :: 0 <= i < |sol| ==> sol[i] == 0
+  requires |sol| <= |p.gains| 
+  requires |sol| <= |p.weights|
+  // ensures gain(p, sol) == partialProfit
+{
 
-// }
+}
 
 method getPartialSolution(p: Problem, profits: seq<seq<int>>) returns (solution: seq<int>)
     requires isValidProblem(p)
-    requires 2 <= |profits| <= |p.weights| + 1
-    requires 2 <= |profits| <= p.numberOfObjects + 1
+    requires 1 <= |profits| <= |p.weights| + 1
+    requires 1 <= |profits| <= p.numberOfObjects + 1
     requires forall k :: 0 <= k < |profits| ==> 1 <= |profits[k]| <= p.knapsackCapacity + 1
+    requires |profits| > 1 ==> forall a :: 0 <= a < |profits| - 1 ==> |profits[a]| == p.knapsackCapacity + 1
     ensures hasOnlyPermittedValues(solution)
     ensures |solution| == p.numberOfObjects
 {
@@ -245,6 +319,7 @@ method getPartialSolution(p: Problem, profits: seq<seq<int>>) returns (solution:
       invariant 0 <= i <= |profits| - 1
       invariant 0 <= i <= |p.weights|
       invariant 0 <= j <= |profits[i]| - 1
+      invariant 0 <= j <= p.knapsackCapacity + 1
       invariant hasOnlyPermittedValues(solution)
       invariant 0 <= i <= p.numberOfObjects
       invariant |solution| > 0 ==> lengthSol + 1 == |solution|
@@ -258,7 +333,7 @@ method getPartialSolution(p: Problem, profits: seq<seq<int>>) returns (solution:
     {
       lengthSol := |solution|;
       lengthI := i;
-      assume 0 <= j < |profits[i - 1]|; //to be deleted
+      assert 0 <= i - 1 <= |profits| - 1;
       if profits[i][j] == profits[i - 1][j] {
         solution := [0] + solution;
         i := i - 1;
@@ -301,6 +376,8 @@ method getPartialSolution(p: Problem, profits: seq<seq<int>>) returns (solution:
     }
     assert i == 0;
     assert |solution| == p.numberOfObjects;
+
+
 }
 
 method Main()
