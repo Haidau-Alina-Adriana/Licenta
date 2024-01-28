@@ -117,6 +117,8 @@ method getMaximProfit(p: Problem) returns (maximProfit: int, finalSolution: seq<
     profits := profits + [partialProfits];
     solutions := solutions + [partialSolutions];
     assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> weight(p, solutions[k][q]) <= q;
+    assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: 0 <= w < |solutions[k][q]| ==> solutions[k][q][w] == 0;
+     assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> solutions[k][q][i - 1] == 0;
 
     while i <= p.numberOfObjects 
       invariant |profits| == |solutions| == i > 0
@@ -129,7 +131,7 @@ method getMaximProfit(p: Problem) returns (maximProfit: int, finalSolution: seq<
       invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> hasOnlyPermittedValues(solutions[k][q])
       invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> weight(p, solutions[k][q]) <= q //each solution does not exceed the
                                                                                                       //maximum required capacity between 0 and p.knapsackCapacity
-      invariant i < p.numberOfObjects ==> forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i]| <= w < |solutions[k][q]| ==>
+      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i - 1]| <= w < |solutions[k][q]| ==>
                                                                                                   solutions[k][q][w] == 0
     {
         partialProfits, partialSolutions := getPartialProfits(p, profits, solutions, i);
@@ -206,7 +208,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
   requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == p.numberOfObjects 
   requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> hasOnlyPermittedValues(solutions[k][q])
   requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> weight(p, solutions[k][q]) <= q
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i]| <= w < |solutions[k][q]| ==>
+  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i - 1]| <= w < |solutions[k][q]| ==>
                                                                                                   solutions[k][q][w] == 0
 
   ensures |partialSolutions| == p.knapsackCapacity + 1
@@ -216,6 +218,8 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
   ensures forall k :: 0 <= k < |partialSolutions| ==> hasOnlyPermittedValues(partialSolutions[k])
   ensures forall k :: 0 <= k < |partialSolutions| ==> weight(p, partialSolutions[k]) <= k
   ensures forall k :: 0 <= k < |partialSolutions| ==> forall q :: |partialSolutions[k][..i]| <= q < |partialSolutions[k]| ==> partialSolutions[k][q] == 0
+  ensures forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i - 1]| <= w < |solutions[k][q]| ==>
+                                                                                                  solutions[k][q][w] == 0
 {
         partialProfits := [];
         var j := 0;
@@ -245,7 +249,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
 
           invariant forall k :: |currentSolution[..i]| <= k < |currentSolution| ==> currentSolution[k] == 0 // all objects after the i obj will not be taken in knapsack
           invariant forall k :: 0 <= k < |partialSolutions| ==> forall q :: |partialSolutions[k][..i]| <= q < |partialSolutions[k]| ==> partialSolutions[k][q] == 0
-          invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i]| <= w < |solutions[k][q]| ==>
+          invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> forall w :: |solutions[k][q][..i - 1]| <= w < |solutions[k][q]| ==>
                                                                                                   solutions[k][q][w] == 0
           invariant forall k :: 0 <= k < |partialSolutions| ==> weight(p, partialSolutions[k]) <= k
           invariant weight(p, currentSolution) <= j
@@ -270,7 +274,9 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
                   partialProfits := partialProfits + [p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]]];
 
                   var currentSolution := solutions[i - 1][j - p.weights[i - 1]];
-                  TookObjIntoKnapsackLemma(p, i - 1, j, currentSolution); // i - 1 obj from getPartialProfits == i obj from solution 
+                  assert currentSolution[i - 1] == 0;
+                  assert computeWeight(p.weights, currentSolution[i - 1 := 0], |currentSolution| - 1) <= j;
+                  TookObjIntoKnapsackLemma(p, i - 1, j, currentSolution, i - 1); // i - 1 obj from getPartialProfits == i obj from solution 
 
                   currentSolution := currentSolution[i - 1 := 1];
                   partialSolutions := partialSolutions + [currentSolution];
@@ -307,7 +313,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
         }
 }
 
-lemma TookObjIntoKnapsackLemma(p: Problem, i: int, j: int, sol: seq<int>)
+lemma TookObjIntoKnapsackLemma(p: Problem, i: int, j: int, sol: seq<int>, idx: int)
   requires isValidProblem(p)
   requires 0 <= i < |sol|
   requires 0 <= i < |p.weights|
@@ -315,61 +321,56 @@ lemma TookObjIntoKnapsackLemma(p: Problem, i: int, j: int, sol: seq<int>)
   requires hasOnlyPermittedValues(sol)
   requires 0 <= j <= p.knapsackCapacity + 1
 
-  requires forall k :: |sol[..i + 1]| <= k < |sol| ==> sol[k] == 0 // all objects after i (included) are not taken
-  requires weight(p, sol) <= j - p.weights[i]
+  requires forall k :: |sol[..i]| <= k < |sol| ==> sol[k] == 0 // all objects after i are not taken
   
-  ensures weight(p, sol[i := 1]) <= j
-{                                     //TODO finish lemma
-  //  if i == |sol| - 1 {
-  //   // assert  computeWeight(p.weights, sol, i) == 0;
-  //   assert weight(p, sol) + p.weights[i] <= j;
-  // } else {
-  //   assert forall k :: |sol[..i + 1]| <= k < |sol| ==> sol[k] == 0;
-  //   Weight0Lemma(p, sol[i + 1..], |sol[i + 1..]| - 1);
-  //   assert weight(p, sol[i + 1..]) == 0;
-  // }
+  requires weight(p, sol) <= j - p.weights[i]
+  requires sol[i] == 0
+  requires computeWeight(p.weights, sol, |sol| - 1) + p.weights[i] <= j
+  requires computeWeight(p.weights, sol[i := 0], |sol| - 1) <= j - p.weights[i]
+
+  ensures computeWeight(p.weights, sol[i := 1], |sol| - 1) <= j
+{   
+    var k := 0;
+    while k <= |sol| - 1 
+      invariant 0 <= k <= |sol|
+    {
+      assert computeWeight(p.weights, sol[i := 1], k) <= j;
+      assert computeWeight(p.weights, sol, k) + p.weights[i] <= j;
+      k := k + 1;
+    }
 }
 
-// lemma TookObjIntoKnapsackLemma(p: Problem, sol: seq<int>, k: int, i: int, j: int)
+// lemma SameWeightIfObjNotTaken(p: Problem, sol: seq<int>, i: int)
 //   requires isValidProblem(p)
-//   requires 0 <= k < |sol|
-//   requires 0 <= k < |p.weights|
-//   requires |sol| == p.numberOfObjects 
+//   requires 0 < i < |sol| - 1
+//   requires 0 < i < |p.weights| - 1
+//   requires |sol| == p.numberOfObjects == |p.weights|
 //   requires hasOnlyPermittedValues(sol)
 
-//   requires 0 <= j <= p.knapsackCapacity + 1
-//   requires 1 < i < |sol|
-//   // requires p.weights[obj - 1] <= w
-//   requires weight(p, sol) == j - p.weights[i - 1]
-//   requires sol[i] == 0
-//   requires i == |sol| - 1
-//   // ensures weight(p, sol[obj - 1 := 1]) == w
+//   requires sol[|sol| - 1] == 0
+//   ensures computeWeight(p.weights, sol, i) == computeWeight(p.weights, sol[..|sol| - 1], i)
 // {
-//     assert weight(p, sol) <= j;
-//     assert weight(p, sol) == computeWeight(p.weights, sol, |sol| - 1);
-//     assert computeWeight(p.weights, sol, |sol| - 1) == if |sol| == 1 then sol[0] * p.weights[0] else sol[|sol| - 1] * p.weights[|sol| - 1] + computeWeight(p.weights, sol, |sol| - 2);
-//     assert computeWeight(p.weights, sol, |sol| - 1) == if |sol| == 1 then 0 * p.weights[0] else 0 * p.weights[|sol| - 1] + computeWeight(p.weights, sol, |sol| - 2);
 
-//     // cw(p, sol, |sol[..i - 1]| - 1);
-
-//     assert weight(p, sol[..i - 1]) == computeWeight(p.weights, sol[..i - 1], |sol[..i - 1]| - 1);
-//     assert computeWeight(p.weights, sol[..i - 1], |sol[..i - 1]| - 1) == if |sol[..i - 1]| == 1 then sol[0] * p.weights[0] else sol[|sol[..i - 1]| - 1] * p.weights[|sol[..i - 1]| - 1] + computeWeight(p.weights, sol[..i - 1], |sol[..i - 1]| - 2);
-//     // assert computeWeight(p.weights, sol[..i - 1], |sol[..i - 1]| - 1) == if |sol[..i - 1]| == 1 then 0 * p.weights[0] else 0 * p.weights[|sol[..i - 1]| - 1] + computeWeight(p.weights, sol[..i - 1], |sol[..i - 1]| - 2);
-    
-//     // assert weight(p, sol) == weight(p, sol[..obj - 1]);
-//     // assert p.weights[obj - 1] <= w;
-//     // assert weight(p, sol[obj - 1 := 1]) <= w;
 // }
 
-lemma cw(p: Problem, sol: seq<int>, i: int)
-  requires hasOnlyPermittedValues(sol)
-  requires 0 < i < |p.weights|
-  requires |sol| == |p.weights|
-  requires 0 < i < |sol| - 1
-  ensures computeWeight(p.weights, sol, i) == computeWeight(p.weights, sol[..|sol| - 1], i)
-{
+// lemma SameWeightIfObjNotTaken2(p: Problem, sol: seq<int>, i: int, idx: int)
+//   requires isValidProblem(p)
+//   requires 0 < i < |sol| - 1
+//   requires 0 < i < |p.weights| - 1
+//   requires 0 < idx < |sol| 
+//   requires |sol| == |p.weights|
+//   requires hasOnlyPermittedValues(sol)
 
-}
+//   requires forall k :: |sol[..i]| <= k < |sol| ==> sol[k] == 0
+//   ensures computeWeight(p.weights, sol, i) == computeWeight(p.weights, sol[..i], i - 1)
+// {
+//   if idx == i {
+//     SameWeightIfObjNotTaken(p, sol, idx - 1);
+//   } else {
+//     SameWeightIfObjNotTaken2(p, sol[..|sol| - 1], i, idx - 1);
+//     assert computeWeight(p.weights, sol, i) == computeWeight(p.weights, sol[..|sol| - 1], i - 1);
+//   }
+// }
 
 lemma Weight0Lemma(p: Problem, sol: seq<int>, i: int)
   requires isValidProblem(p)
@@ -386,16 +387,6 @@ lemma Weight0Lemma(p: Problem, sol: seq<int>, i: int)
     assert computeWeight(p.weights, sol, i - 1) == 0;
     assert computeWeight(p.weights, sol, i) == 0;
   }
-}
-
-lemma gainLemma(p: Problem, sol: seq<int>, partialProfit: int)
-  requires isValidProblem(p)
-  // requires isValidPartialSolution(p, sol)
-  requires |sol| <= |p.gains| 
-  requires |sol| <= |p.weights|
-  // ensures gain(p, sol) == partialProfit
-{
-
 }
 
 method Main()
