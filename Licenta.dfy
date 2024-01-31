@@ -275,7 +275,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
 
                   var currentSolution := solutions[i - 1][j - p.weights[i - 1]];
                   assert currentSolution[i - 1] == 0;
-                  assert computeWeight(p.weights, currentSolution[i - 1 := 0], |currentSolution| - 1) <= j;
+                  assert computeWeight(p.weights, currentSolution, |currentSolution| - 1) <= j;
                   TookObjIntoKnapsackLemma(p, i - 1, j, currentSolution, i - 1); // i - 1 obj from getPartialProfits == i obj from solution 
 
                   currentSolution := currentSolution[i - 1 := 1];
@@ -338,6 +338,9 @@ lemma TookObjIntoKnapsackLemma(p: Problem, i: int, j: int, sol: seq<int>, idx: i
       assert computeWeight(p.weights, sol, k) + p.weights[i] <= j;
       k := k + 1;
     }
+    assert k == |sol|;
+    assert computeWeight(p.weights, sol, |sol| - 1) + p.weights[i] <= j;
+    assert computeWeight(p.weights, sol[i := 1], |sol| - 1) <= j;
 }
 
 // lemma SameWeightIfObjNotTaken(p: Problem, sol: seq<int>, i: int)
