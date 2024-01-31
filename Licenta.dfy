@@ -334,8 +334,9 @@ lemma TookObjIntoKnapsackLemma(p: Problem, i: int, j: int, sol: seq<int>, idx: i
     while k <= |sol| - 1 
       invariant 0 <= k <= |sol|
     {
-      assert computeWeight(p.weights, sol[i := 1], k) <= j;
-      assert computeWeight(p.weights, sol, k) + p.weights[i] <= j;
+      // assert computeWeight(p.weights, sol[i := 1], k) <= j;
+      // assert computeWeight(p.weights, sol, k) + p.weights[i] <= j;
+      assert computeWeight(p.weights, sol[i := 1], k) <= computeWeight(p.weights, sol, k) + p.weights[i] <= j;
       k := k + 1;
     }
     assert k == |sol|;
