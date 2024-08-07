@@ -283,7 +283,7 @@ lemma Weight0ImpliesGain0(p: Problem, sol: seq<int>, i:int, j: int)
 
 lemma MaximumWeightAllowedIs0(p: Problem, sol: seq<int>, i: int, j: int)
  requires isValidProblem(p)
- requires 1 <= i <= |sol|
+ requires 1 <= i <= p.numberOfObjects
  requires 1 <= i <= |p.gains|
  requires j == 0
  requires isPartialSolutionOfFirstIObjectsAndWeightJ(p, sol, i, j)
@@ -416,7 +416,7 @@ method FillMatrixForObject0(p: Problem, profits: seq<seq<int>>, solutions : seq<
 
 lemma NotAddingObjectLeadsToOptimal(p: Problem, sol: seq<int>, i: int, j: int)
  requires isValidProblem(p)
- requires 1 <= i <= |sol|
+ requires 1 <= i <= p.numberOfObjects
  requires 1 <= i <= |p.gains|
  requires 1 <= j <= p.knapsackCapacity
  requires isPartialSolutionOfFirstIObjectsAndWeightJ(p, sol, i, j)
@@ -428,17 +428,35 @@ lemma NotAddingObjectLeadsToOptimal(p: Problem, sol: seq<int>, i: int, j: int)
     
     assume exists x :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
     var x : seq<int> :| isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+
     
     assert gain(p, sol) < gain(p, x);
     if sol[i - 1] == 1 {
-      assert weight(p, sol) >= p.weights[i] > j;
+      assert weight(p, sol) >= p.weights[i - 1] > j;
       assert !isPartialSolutionOfFirstIObjectsAndWeightJ(p, sol, i, j);
       assert false;
     }
-    assume false; 
-    assert sol[i] == 0;
-    assume false;
-    assert x[i] == 0;
+
+    assert sol[i - 1] == 0;
+
+    assert |x| == |sol|;
+    assert isValidPartialSolution(p, x);
+    assert weight(p, x) <= j;
+    assert p.weights[i - 1] > j;
+
+    assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+
+    if x[i - 1] == 1 {
+      assert p.weights[i - 1] > j;
+      assert isValidPartialSolution(p, x);
+      assert computeWeight(p.weights, x, |x| - 1) == computeWeight(p.weights, x, |x[..i]| - 1) + p.weights[i - 1];
+      assert weight(p, x) >= p.weights[i - 1] > j;
+      assert !isPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+      assert false;
+      assert x[i - 1] == 0;
+    }
+
+    assert x[i - 1] == 0;
     assume false;
     // assert gain(sol[..i]) == gain(sol);
     // assert gain(x[..i]) == gain(x);
@@ -448,7 +466,7 @@ lemma NotAddingObjectLeadsToOptimal(p: Problem, sol: seq<int>, i: int, j: int)
 
 lemma TakingObjectLeadsToOptimalPartSol(p: Problem, prevMaxProfit: int, pSol: seq<int>, cSol: seq<int>, i: int, j: int)
  requires isValidProblem(p)
- requires 1 <= i <= |cSol|
+ requires 1 <= i <= p.numberOfObjects
  requires 1 <= i <= |p.gains|
  requires 0 <= j <= p.knapsackCapacity
  requires cSol == pSol + [1]
