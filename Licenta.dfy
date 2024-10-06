@@ -484,6 +484,44 @@ lemma proveLastElemIs0AndGainIsUnchanged(p: Problem, sol: seq<int>, i: int, j: i
     assert gain(p, sol[..i - 1]) == gain(p, sol);
 }
 
+lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int) 
+ requires isValidProblem(p)
+ requires 1 <= i <= p.numberOfObjects
+ requires 0 <= j <= p.knapsackCapacity
+
+ ensures exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j)
+{
+  var k : int := 0;
+  var completeSol := seq(i, w => 1);
+  assert forall q :: 0 <= q < i ==> completeSol[q] == 1;
+  var sumAllGains := computeGain(p.gains, completeSol, |completeSol| - 1);
+  assert forall k :: 0 <= k < i ==> p.gains[k] > 0;
+
+  if !exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j) {
+    var q := 0; 
+    var currentSol := seq(i, w => 0);
+    Weight0Lemma(p, currentSol, |currentSol| - 1);
+    assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j);
+    Gain0Lemma(p, currentSol, |currentSol| - 1);
+    assert computeGain(p.gains, currentSol, |currentSol| - 1) == 0 >= q;
+
+    while q < sumAllGains + 1
+      // invariant 0 <= q <= sumAllGains + 1
+      invariant !exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j)
+      invariant !isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j)
+      invariant isPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j)
+      invariant computeGain(p.gains, currentSol, |currentSol| - 1) >= q
+    {
+      assert exists s_i :: isPartialSolutionOfFirstIObjectsAndWeightJ(p, s_i, i, j) && gain(p, s_i) > gain(p, currentSol);
+      var s_i :| isPartialSolutionOfFirstIObjectsAndWeightJ(p, s_i, i, j) && gain(p, s_i) > gain(p, currentSol);
+      
+      currentSol := s_i;
+      q := computeGain(p.gains, s_i, |s_i| - 1);
+    }
+    assert computeGain(p.gains, currentSol, |currentSol| - 1) >= sumAllGains + 1;
+    assert false;
+  }
+}
 
 lemma NotTakingObjectLeadsToOptimalCase2(p: Problem, sol: seq<int>, i: int, j: int) // sol is solutions[i - 1][j]
  requires isValidProblem(p)
@@ -508,7 +546,13 @@ lemma NotTakingObjectLeadsToOptimalCase2(p: Problem, sol: seq<int>, i: int, j: i
     assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
     assert !isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
     
-    assume exists x :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+    // assume exists x :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+    ExistsOptimalPartialSolution(p, i, j);
+    assert isValidProblem(p);
+    assert 1 <= i <= p.numberOfObjects;
+    assert 0 <= j <= p.knapsackCapacity;
+    assert exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
+
     var x : seq<int> :| isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
 
     proveLastElemIs0AndGainIsUnchanged(p, s, i, j);
