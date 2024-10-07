@@ -32,8 +32,22 @@ function computeGain(gains: seq<int>, solution: seq<int>, i: int) : int
   requires hasOnlyPermittedValues(solution)
   requires 0 <= |solution| <= |gains|
   ensures computeGain(gains, solution, i) == if i == 0 then solution[0] * gains[0] else solution[i] * gains[i] + computeGain(gains, solution, i - 1)
+  // ensures 
 {
    if i == 0 then solution[0] * gains[0] else solution[i] * gains[i] + computeGain(gains, solution, i - 1)
+}
+
+function computeGainNew(p: Problem , solution: seq<int>, i: int) : int
+  requires isValidProblem(p)
+  requires 0 <= i < |solution|
+  requires 0 <= i < |p.gains|
+  requires hasOnlyPermittedValues(solution)
+  requires 0 <= |solution| <= |p.gains|
+  ensures computeGainNew(p, solution, i) == if i == 0 then solution[0] * p.gains[0] else solution[i] * p.gains[i] + computeGainNew(p, solution, i - 1)
+  ensures computeGainNew(p, solution, i) == computeGain(p.gains, solution, i)
+   ensures computeGainNew(p, solution, i) >= 0
+{
+   if i == 0 then solution[0] * p.gains[0] else solution[i] * p.gains[i] + computeGainNew(p, solution, i - 1)
 }
 
 function weight(p: Problem, solution: seq<int>): int
@@ -484,6 +498,33 @@ lemma proveLastElemIs0AndGainIsUnchanged(p: Problem, sol: seq<int>, i: int, j: i
     assert gain(p, sol[..i - 1]) == gain(p, sol);
 }
 
+function MaximumGain(p: Problem, i: int) : int
+ requires isValidProblem(p)
+ requires 1 <= i <= p.numberOfObjects
+
+ ensures MaximumGain(p, i) >= 0
+{
+  if (i == 1) then p.gains[0] else p.gains[i - 1] + MaximumGain(p, i -1)
+}
+
+lemma GainUpperBound(p: Problem, i: int, s: seq<int>) 
+ requires isValidProblem(p)
+ requires 1 <= i <= p.numberOfObjects
+ requires 0 <= |s| <= |p.gains|
+ requires isValidPartialSolution(p, s) && |s| >= i 
+
+ ensures computeGainNew(p, s, i - 1) <= MaximumGain(p, i)
+{
+  var completeSol := seq(i, w => 1);
+  assert forall q :: 0 <= q < i ==> completeSol[q] == 1;
+  var sumAllGains := computeGainNew(p, completeSol, |completeSol| - 1);
+  if i > 1 { 
+    GainUpperBound(p, i - 1, s);
+    assert computeGainNew(p, s, i - 2) <= MaximumGain(p, i - 1);
+  } else {
+  }
+}
+
 lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int) 
  requires isValidProblem(p)
  requires 1 <= i <= p.numberOfObjects
@@ -494,7 +535,7 @@ lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int)
   var k : int := 0;
   var completeSol := seq(i, w => 1);
   assert forall q :: 0 <= q < i ==> completeSol[q] == 1;
-  var sumAllGains := computeGain(p.gains, completeSol, |completeSol| - 1);
+  var sumAllGains := MaximumGain(p, i);
   assert forall k :: 0 <= k < i ==> p.gains[k] > 0;
 
   if !exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j) {
@@ -504,9 +545,10 @@ lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int)
     assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j);
     Gain0Lemma(p, currentSol, |currentSol| - 1);
     assert computeGain(p.gains, currentSol, |currentSol| - 1) == 0 >= q;
+    assert sumAllGains == MaximumGain(p, i);
 
     while q < sumAllGains + 1
-      // invariant 0 <= q <= sumAllGains + 1
+      invariant 0 <= q <= sumAllGains + 1
       invariant !exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j)
       invariant !isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j)
       invariant isPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSol, i, j)
@@ -517,8 +559,12 @@ lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int)
       
       currentSol := s_i;
       q := computeGain(p.gains, s_i, |s_i| - 1);
+      GainUpperBound(p, i,  s_i);
+
     }
-    assert computeGain(p.gains, currentSol, |currentSol| - 1) >= sumAllGains + 1;
+    
+    assert computeGainNew(p, currentSol, |currentSol| - 1) >= sumAllGains + 1;
+    GainUpperBound(p, i,  currentSol);
     assert false;
   }
 }
@@ -635,6 +681,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
               assert weight(p, currentSolution) == 0 <= j;
               assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSolution, i, j);
 
+              assume false;
               MaximumWeightAllowedIs0(p, currentSolution, i, j);
               assert isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSolution, i, j);
           } else {
