@@ -229,15 +229,7 @@ lemma ComputeGainHelper(p: Problem, sol: seq<int>, i: int)
   requires i <= |sol[..|sol| - 1]| - 1
 
   ensures computeGain(p.gains, sol, i) == computeGain(p.gains, sol[..|sol| - 1], i)
-{
-  // for j := 0 to i 
-  // invariant computeGain(p.gains, sol, j) == computeGain(p.gains, sol[..|sol| - 1], j)
-  // { }
-  // if (i == 0) {
-  // } else {
-  //   ComputeGainHelper(p, sol, i - 1);
-  // }
-}
+{ }
 
 lemma LastElementIs1ForGainHelper(p: Problem, sol: seq<int>)
   requires isValidProblem(p)
@@ -343,7 +335,6 @@ lemma SubsolutionWeightIsZero(p: Problem, sol: seq<int>, i:int, j: int, idx: int
  
  ensures computeWeight(p.weights, sol, idx) == 0
 {
-  assume false;
   assert computeWeight(p.weights, sol, n) == 0;
 
   if idx == n {
@@ -531,6 +522,40 @@ method FillMatrixForObject0(p: Problem, profits: seq<seq<int>>, solutions : seq<
         }
 }
 
+lemma NotAddingObjectHasSameGainAsOptimalSol(p: Problem, profit1: int, profit2: int, sol1: seq<int>, sol2:seq<int>, x: seq<int>, i: int, j: int)
+ requires isValidProblem(p)
+ requires 1 <= i <= p.numberOfObjects
+ requires 0 <= j <= p.knapsackCapacity
+ requires p.weights[i - 1] <= j
+ requires isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, sol1, i - 1, j - p.weights[i - 1])
+ requires isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, sol2, i - 1, j)
+ requires computeWeight(p.weights, sol2 + [0], |sol2 + [0]| - 1) <= j
+ requires profit1 == gain(p, sol1)
+ requires profit2 == gain(p, sol2)
+ requires p.gains[i - 1] + profit1 <= profit2
+ requires isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j)
+ requires x[i - 1] == 0
+
+ ensures gain(p, x) == gain(p, sol2 + [0])
+{
+  var x' := x[..i - 1];
+  assert x' == x[..|x| - 1];
+  LastElementIs0ForGainHelper(p, x);
+  assert gain(p, x) == gain(p, x[..i - 1]) == gain(p, x');
+
+  OptimalSubsolutionForLastElement0(p, x, i, j);
+  assert isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x', i - 1, j);
+
+  assert gain(p, x') == gain(p, sol2);
+  
+  LastElementIs0ForGainHelper(p, sol2 + [0]);
+  assert gain(p, sol2) == gain(p, sol2 + [0]);
+
+  LastElementIs0ForGainHelper(p, x);
+  assert x == x' + [0];
+  assert gain(p, x' + [0]) == gain(p, x) == gain(p, sol2 + [0]);
+}
+
 lemma NotTakingObjectLeadsToOptimalCase1(p: Problem, profit1: int, profit2: int, sol1: seq<int>, sol2:seq<int>, i: int, j: int) 
                                     // profit1 = profits[i - 1][j - p.weights[i - 1]] 
                                     // profit2 = profits[i - 1][j] 
@@ -549,12 +574,23 @@ lemma NotTakingObjectLeadsToOptimalCase1(p: Problem, profit1: int, profit2: int,
 {
   if !isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, sol2 + [0], i, j) {
     ExistsOptimalPartialSolution(p, i, j);
-    //assert exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
     var x : seq<int> :| isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
+
     if x[i - 1] == 1 {
-      assume false;
+      var x' := x[..i - 1];
+      assert gain(p, x') == profit1 by {
+        OptimalSubsolutionForLastElement1(p, x, i, j);
+        assert x' == x[..|x| - 1];
+        assert isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x', i - 1, j - p.weights[i - 1]);
+      }
+      LastElementIs1ForGainHelper(p, x);
+      LastElementIs0ForGainHelper(p, sol2 + [0]);
+      assert gain(p, x) == gain(p, x') + p.gains[i - 1] <= gain(p, sol2 + [0]);
+      assert false;
     }
-    assume false;
+    assert x[i - 1] == 0;
+    NotAddingObjectHasSameGainAsOptimalSol(p, profit1, profit2, sol1, sol2, x, i, j);
+    assert gain(p, x) == gain(p, sol2 + [0]);
   }
 }
 
@@ -616,7 +652,6 @@ lemma ExistsOptimalPartialSolution(p: Problem, i: int, j: int)
 
  ensures exists s :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j)
 {
-  assume false;
   var k : int := 0;
   var completeSol := seq(i, w => 1);
   assert forall q :: 0 <= q < i ==> completeSol[q] == 1;
@@ -664,7 +699,6 @@ lemma NotTakingObjectLeadsToOptimalCase2(p: Problem, sol: seq<int>, i: int, j: i
 
  ensures isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, sol + [0], i, j)
 {
-  // assume false;
   var s := sol + [0];
   LastElementIs0ForWeightHelper(p, s);
 
@@ -672,7 +706,6 @@ lemma NotTakingObjectLeadsToOptimalCase2(p: Problem, sol: seq<int>, i: int, j: i
     assert isPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
     assert !isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, s, i, j);
     
-    // assume exists x :: isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, x, i, j);
     ExistsOptimalPartialSolution(p, i, j);
     assert isValidProblem(p);
     assert 1 <= i <= p.numberOfObjects;
