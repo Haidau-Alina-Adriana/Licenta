@@ -940,7 +940,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
               }
             } else {
 
-                var currentProfit, currentSolution := caseWeightExceedsAllowedCapacity(p, profits, solutions, partialProfits, partialSolutions, i, j);
+                var currentProfit, currentSolution := caseObjWeightExceedsAllowedCapacity(p, profits, solutions, partialProfits, partialSolutions, i, j);
                 partialProfits := partialProfits + [currentProfit];
                 partialSolutions := partialSolutions + [currentSolution];
 
@@ -1070,7 +1070,7 @@ method caseNotObtainingBetterProfit(p: Problem, profits: seq<seq<int>>, solution
     assert isOptimalPartialSolutionOfFirstIObjectsAndWeightJ(p, currentSolution, i, j);   
 }
 
-method caseWeightExceedsAllowedCapacity(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
+method caseObjWeightExceedsAllowedCapacity(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
   requires isValidProblem(p)
   requires 0 < i <= p.numberOfObjects
   requires i == |profits| == |solutions|
