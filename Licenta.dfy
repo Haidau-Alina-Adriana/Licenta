@@ -335,26 +335,22 @@ lemma SubsolutionWeightIsZero(p: Problem, sol: seq<int>, i:int, j: int, idx: int
  
  ensures computeWeight(p.weights, sol, idx) == 0
 {
-  assert computeWeight(p.weights, sol, n) == 0;
-
   if idx == n {
-    // assert (computeWeight(p.weights, sol, |sol| - 1) == 0 && (forall k :: 0 <= k < |p.weights| ==> p.weights[k] > 0)) ==>
-    //         sol[0] * p.weights[0] == 0;
-    // assert computeWeight(p.weights, sol, idx) == 0;
+    assert computeWeight(p.weights, sol, idx) == 0;
   } else {
-    assert n > 0;
-    assert 0 <= idx < n;
-    assert computeWeight(p.weights, sol, n) == 0;
-    assert p.weights[n] > 0;
-    assert 0 <= sol[n] <= 1;
-    assert sol[n] * p.weights[n] >= 0;
-    assert computeWeight(p.weights, sol, n) == sol[n] * p.weights[n] + computeWeight(p.weights, sol, n - 1);
-    assert computeWeight(p.weights, sol, n - 1) == 0;
+    assert computeWeight(p.weights, sol, n - 1) == 0 by 
+    {
+      assert n > 0;
+      assert 0 <= idx < n;
+      assert computeWeight(p.weights, sol, n) == 0;
+      assert p.weights[n] > 0;
+      assert 0 <= sol[n] <= 1;
+      assert sol[n] * p.weights[n] >= 0;
+      assert computeWeight(p.weights, sol, n) == sol[n] * p.weights[n] + computeWeight(p.weights, sol, n - 1);
+    }
     SubsolutionWeightIsZero(p, sol, i, j, idx, n - 1);
     assert computeWeight(p.weights, sol, idx) == 0;
   }
-
-  assert computeWeight(p.weights, sol, idx) == 0;
 }
 
 lemma Weight0ImpliesGain0(p: Problem, sol: seq<int>, i:int, j: int)
