@@ -107,7 +107,8 @@ ghost predicate isOptimalPartialSolution(p: Problem, solution: Solution, i: int,
   requires 0 <= j <= p.c
 {
   isPartialSolution(p, solution, i, j) &&
-  forall s: Solution :: (isPartialSolution(p, s, i, j) && |s| == |solution| ==> gain(p, solution) >= gain(p, s))
+  forall s: Solution :: (isPartialSolution(p, s, i, j) && |s| == |solution| 
+      ==> gain(p, solution) >= gain(p, s))
 }
 
 ghost predicate isOptimalSolution(p: Problem, solution: Solution)
@@ -117,6 +118,34 @@ ghost predicate isOptimalSolution(p: Problem, solution: Solution)
   isOptimalPartialSolution(p, solution, p.n, p.c) &&
   forall s: Solution :: (((isOptimalPartialSolution(p, s, p.n, p.c)) ==> 
   gain(p, solution) >= gain(p, s)))
+}
+
+predicate hasValidBounds(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, i: int, j: int) 
+{
+  isValidProblem(p) && 
+  1 <= i <= p.n && 
+  1 <= j <= p.c && 
+  i == |profits| == |solutions|
+}
+
+ghost predicate areValidSolutions(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, i: int, j: int)
+  requires hasValidBounds(p, profits, solutions, i, j)
+{
+  (forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1) && 
+  (forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
+                    isOptimalPartialSolution(p, solutions[k][q], k, q)) && 
+  (forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
+                gain(p, solutions[k][q]) == profits[k][q])
+}
+
+ghost predicate areValidPartialSolutions(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, 
+                partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) 
+                
+  requires hasValidBounds(p, profits, solutions, i, j)
+{
+  |partialSolutions| == |partialProfits| == j && 
+  (forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)) && 
+  (forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k])
 }
 
 lemma ComputeWeightFits1(p: Problem, solution: Solution, i: int, j: int)
@@ -136,9 +165,7 @@ lemma ComputeWeightFits1(p: Problem, solution: Solution, i: int, j: int)
   for a := 0 to |s'[..|s'| - 1]|
     invariant 0 <= a <= |s'[..|s'| - 1]| + 1
     invariant forall k :: 0 <= k < a ==> computeWeight(p.weights, solution, k) == computeWeight(p.weights, s', k)
-  {
-    assert computeWeight(p.weights, solution, a) == computeWeight(p.weights, s', a);
-  }
+  { }
 }
 
 lemma ComputeWeightFits0(p: Problem, solution: Solution, j: int)
@@ -279,7 +306,8 @@ lemma emptySolOptimal(p: Problem, solution: Solution, i: int, j: int)
   forall s: Solution  | isPartialSolution(p, s, i, j) && |solution| == |s|
   ensures gain(p, solution) >= gain(p, s) 
   { } 
-  assert forall s: Solution :: ((isPartialSolution(p, s, i, j) && |s| == |solution| ==> gain(p, solution) >= gain(p, s)));
+  assert forall s: Solution :: ((isPartialSolution(p, s, i, j) && |s| == |solution|
+     ==> gain(p, solution) >= gain(p, s)));
 }
 
 lemma ComputeWeightAllZeros(p: Problem, solution: Solution, i: int)
@@ -334,7 +362,6 @@ lemma {:induction false} ComputeWeightCapacity0(p: Problem, solution: Solution, 
   } else {
     assert computeWeight(p.weights, solution, x - 1) == 0 by 
     {
-      assert x > 0;
       assert 0 <= idx < x;
       assert computeWeight(p.weights, solution, x) == 0;
       assert p.weights[x] > 0;
@@ -396,7 +423,7 @@ lemma OptimalSolCapacity0(p: Problem, solution: Solution, i: int)
   assert isOptimalPartialSolution(p, solution, i, 0);
 }
 
-lemma GainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, x: Solution, i: int, j: int) //GainAdd0
+lemma GainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, x: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
  requires 0 <= j <= p.c
@@ -481,7 +508,8 @@ lemma GainAddTooBig(p: Problem, solution: Solution, i: int, j: int)
  ensures gain(p, solution[..i - 1]) == gain(p, solution)
  {
     if solution[i - 1] == 1 {
-      assert computeWeight(p.weights, solution, |solution| - 1) == computeWeight(p.weights, solution, |solution[..i]| - 1) + p.weights[i - 1];
+      assert computeWeight(p.weights, solution, |solution| - 1) == 
+        computeWeight(p.weights, solution, |solution[..i]| - 1) + p.weights[i - 1];
       assert weight(p, solution) >= p.weights[i - 1] > j;
       assert !isPartialSolution(p, solution, i, j);
       assert false;
@@ -527,7 +555,6 @@ lemma ExistsOptimalPartialSol(p: Problem, i: int, j: int)
     var q := 0; 
     var currentSol := seq(i, y => 0);
     ComputeWeightAllZeros(p, currentSol, |currentSol| - 1);
-    assert isPartialSolution(p, currentSol, i, j);
     ComputeGainAllZeros(p, currentSol, |currentSol| - 1);
     assert computeGain(p.gains, currentSol, |currentSol| - 1) == 0 >= q;
     assert sumAllGains == SumAllGains(p, i);
@@ -554,7 +581,7 @@ lemma ExistsOptimalPartialSol(p: Problem, i: int, j: int)
   }
 }
 
-lemma OptimalSolAdd0TooBig(p: Problem, solution: Solution, i: int, j: int) //rename with j rel
+lemma OptimalSolAdd0TooBig(p: Problem, solution: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
  requires 1 <= j <= p.c
@@ -568,28 +595,18 @@ lemma OptimalSolAdd0TooBig(p: Problem, solution: Solution, i: int, j: int) //ren
   WeightAdd0(p, s);
 
   if !isOptimalPartialSolution(p, s, i, j) {
-    assert isPartialSolution(p, s, i, j);
-    assert !isOptimalPartialSolution(p, s, i, j);
-    
     ExistsOptimalPartialSol(p, i, j);
-    assert isValidProblem(p);
-    assert 1 <= i <= p.n;
-    assert 0 <= j <= p.c;
-    assert exists s :: isOptimalPartialSolution(p, s, i, j);
-
     var x : Solution :| isOptimalPartialSolution(p, x, i, j);
 
     GainAddTooBig(p, s, i, j);
-    assert gain(p, s[..i - 1]) == gain(p, s); 
-
     GainAddTooBig(p, x, i, j);
     var x1 := x[..i - 1];
 
     assert gain(p, x1) == gain(p, x) > gain(p, s);  
     assert gain(p, s) == gain(p, solution) < gain(p, x);
     assert gain(p, x1) > gain(p, solution);
-    
     assert isPartialSolution(p, x, i, j);
+
     assert x[i - 1] == 0;
     ComputeWeightAdd0(p, x, |x| - 2);
     assert weight(p, x) == weight(p, x1);
@@ -717,7 +734,6 @@ lemma OptimalSolAdd1(p: Problem, profit1: int, profit2: int, solution1: Solution
         GainAdd0(p, x);
         assert gain(p, x[..i - 1]) == gain(p, x);
         WeightAdd0(p, x);
-        assert weight(p, x) <= j;
         assert weight(p, x[..i - 1]) <= j;
       }
       assert gain(p, solution1 + [1]) > profit2 by 
@@ -746,33 +762,20 @@ method Solve(p: Problem) returns (profit: int, solution: Solution)
     var partialProfits, partialSolutions := Solves0Objects(p, profits, solutions, i);
     profits := profits + [partialProfits];
     solutions := solutions + [partialSolutions];
-    assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> weight(p, solutions[k][q]) <= q; // de vazut care trebuie sa ramana
-    assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == i;
-    assert forall k :: 0 <= k < |partialSolutions| ==> isPartialSolution(p, partialSolutions[k], i, k);
-
+    
     assert forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i ,k);
     assert forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> gain(p, solutions[k][q]) == profits[k][q];
 
     i := i + 1;
 
     while i <= p.n 
-      invariant |profits| == |solutions| == i // de vazut care trebuie sa ramana
       invariant 0 <= i <= p.n + 1
+      invariant |profits| == |solutions| == i
       invariant forall k :: 0 <= k < i ==> |profits[k]| == p.c + 1
-      invariant 0 <= |profits| <= p.n + 1
 
       invariant forall k :: 0 <= k < |solutions| ==> |solutions[k]| == p.c + 1
-      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == k
-      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> hasAllowedValues(solutions[k][q])
-      invariant forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> 0 <= |solutions[k][q]| <= p.n
-
-      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                        isPartialSolution(p, solutions[k][q], k, q)
-
-      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                isOptimalPartialSolution(p, solutions[k][q], k, q)
-      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                gain(p, solutions[k][q]) == profits[k][q]
+      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> isOptimalPartialSolution(p, solutions[k][q], k, q)
+      invariant forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> gain(p, solutions[k][q]) == profits[k][q]
     {
         partialProfits, partialSolutions := getPartialProfits(p, profits, solutions, i);
         profits := profits + [partialProfits];
@@ -787,25 +790,19 @@ method Solve(p: Problem) returns (profit: int, solution: Solution)
     }
     
     solution := solutions[p.n][p.c];
-    assert weight(p, solution) <= p.c; // de vazut care trebuie sa ramana
-    assert isSolution(p, solution);
     assert isOptimalSolution(p, solution);
 
     profit := profits[p.n][p.c];
 }
 
-method Solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
+method Solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) 
+                  returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
+
   requires isValidProblem(p)
   requires |profits| == |solutions| == i == 0
 
-  ensures |partialProfits| == p.c + 1 // de vazut care trebuie sa ramana
+  ensures |partialProfits| == p.c + 1
   ensures |partialSolutions| == p.c + 1
-  ensures forall k :: 0 <= k < |partialSolutions| ==> |partialSolutions[k]| == i
-  ensures forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-  ensures forall k :: 0 <= k < |partialSolutions| ==> weight(p, partialSolutions[k]) <= k
-  ensures forall k :: 0 <= k < |partialSolutions| ==> forall q :: 0 <= q < |partialSolutions[k]| ==> partialSolutions[k][q] == 0
-  ensures forall k :: 0 <= k < |partialSolutions| ==> isPartialSolution(p, partialSolutions[k], i, k)
-
   ensures forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
   ensures forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
 {
@@ -814,81 +811,57 @@ method Solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
         var currentSolution := [];
         partialSolutions := [];
 
-        assert weight(p, currentSolution) == 0;
-
          while j <= p.c
-          invariant 0 <= j <= p.c + 1 // de vazut care trebuie sa ramana
+          invariant 0 <= j <= p.c + 1
           invariant |partialProfits| == j
           invariant |partialSolutions| == j
 
           invariant |partialSolutions| > 0 ==> forall k :: 0 <= k < |partialSolutions| ==> |partialSolutions[k]| == i 
-          invariant forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-          invariant forall k :: 0 <= k < |partialSolutions| ==> weight(p, partialSolutions[k]) <= k
-          invariant forall k :: 0 <= k < |partialSolutions| ==> forall q :: 0 <= q < |partialSolutions[k]| ==> partialSolutions[k][q] == 0
-          invariant forall k :: 0 <= k < |partialSolutions| ==> isPartialSolution(p, partialSolutions[k], i, k)
-
           invariant forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
           invariant forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
         {
-              partialProfits := partialProfits + [0];
-              currentSolution := [];
-              emptySolOptimal(p, currentSolution, i, j);
-              assert isOptimalPartialSolution(p, currentSolution, i, j);
-              partialSolutions := partialSolutions + [currentSolution];
+          partialProfits := partialProfits + [0];
+          currentSolution := [];
+          emptySolOptimal(p, currentSolution, i, j);
+          assert isOptimalPartialSolution(p, currentSolution, i, j);
+          partialSolutions := partialSolutions + [currentSolution];
 
-              assert |currentSolution| == i;
-              assert weight(p, currentSolution) <= j;
-
-              j := j + 1;
+          j := j + 1;
         }
 }
 
-method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
+method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) 
+                            returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
   requires isValidProblem(p)
   requires 0 < i < p.n + 1
   requires i == |profits| == |solutions|
   requires forall k :: 0 <= k < i ==> |profits[k]| == p.c + 1
 
   requires forall k :: 0 <= k < i ==> |solutions[k]| == p.c + 1
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == k
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> hasAllowedValues(solutions[k][q])
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> 0 <= |solutions[k][q]| <= p.n
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                    isPartialSolution(p, solutions[k][q], k, q)
+  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> isOptimalPartialSolution(p, solutions[k][q], k, q) 
+  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> gain(p, solutions[k][q]) == profits[k][q]
 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                    isOptimalPartialSolution(p, solutions[k][q], k, q) 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                gain(p, solutions[k][q]) == profits[k][q]
-
-  ensures |partialSolutions| == p.c + 1
-  ensures |partialProfits| == p.c + 1
+  ensures p.c + 1 == |partialSolutions| == |partialProfits|
   ensures 0 <= |profits| <= p.n + 1 
-  ensures forall k :: 0 <= k < |partialSolutions| ==> |partialSolutions[k]| == i
-  ensures forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-  ensures forall k :: 0 <= k < |partialSolutions| ==> 0 <= |partialSolutions[k]| <= p.n
-  ensures forall k :: 0 <= k < |partialSolutions| ==> isPartialSolution(p, partialSolutions[k], i, k) 
 
   ensures forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
   ensures forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
 {
-        partialProfits := [];
         var j := 0;
+        partialProfits := [];
         partialSolutions := [];
 
         while j <= p.c
           invariant 0 <= j <= p.c + 1
           invariant 0 <= |profits| <= p.n + 1
-          invariant |partialProfits| == j
-          invariant |partialSolutions| == j
+          invariant j == |partialProfits| == |partialSolutions|
 
-          invariant forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
           invariant forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
           invariant forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
         {
           if j == 0 {
 
-              var currentProfit, currentSolution := solveMaxCapacity0(p, i, j);
+              var currentProfit, currentSolution := solveCapacity0(p, i, j);
               partialProfits := partialProfits + [currentProfit];
               partialSolutions := partialSolutions + [currentSolution];
 
@@ -928,174 +901,101 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
         }
 }
 
-method solveMaxCapacity0(p: Problem, i: int, j: int) returns (currentProfit: int, currentSolution: Solution)
+method solveCapacity0(p: Problem, i: int, j: int) returns (currentProfit: int, currentSolution: Solution)
   requires isValidProblem(p)
-  requires 0 < i <= p.n
+  requires 1 <= i <= p.n
   requires j == 0
 
   ensures isOptimalPartialSolution(p, currentSolution, i, j)
-  ensures currentProfit == gain(p, currentSolution)
-                
+  ensures currentProfit == gain(p, currentSolution)               
 {
     currentProfit := 0;
     currentSolution := seq(i, y => 0);
 
-    assert |currentSolution| == i;
     ComputeWeightAllZeros(p, currentSolution, |currentSolution| - 1);
-    assert weight(p, currentSolution) == 0 <= j;
-    assert isPartialSolution(p, currentSolution, i, j);
-    
+
     OptimalSolCapacity0(p, currentSolution, i);
     GainCapacity0(p, currentSolution, i);
     
     assert isOptimalPartialSolution(p, currentSolution, i, j);
 }
 
-method solveAdd1BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
-  requires isValidProblem(p)
-  requires 0 < i <= p.n
-  requires i == |profits| == |solutions|
-  requires 1 <= j <= p.c
+method solveAdd1BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+                             i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
-  requires forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == k
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> hasAllowedValues(solutions[k][q])
-
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                    isOptimalPartialSolution(p, solutions[k][q], k, q) 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                gain(p, solutions[k][q]) == profits[k][q]
-
-  requires |partialSolutions| == |partialProfits| == j
-  requires forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-  requires forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k) 
-  requires forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
+  requires hasValidBounds(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
   
   requires p.weights[i - 1] <= j
   requires p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]] > profits[i - 1][j]
 
   ensures isOptimalPartialSolution(p, currentSolution, i, j)
-  ensures currentProfit == gain(p, currentSolution)
-                
+  ensures currentProfit == gain(p, currentSolution)       
 {
     currentProfit := p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]];
     currentSolution := solutions[i - 1][j - p.weights[i - 1]];
     
     ComputeWeightFits1(p, currentSolution, i - 1, j);
-    assert weight(p, currentSolution) <= j;
 
     OptimalSolAdd1(p, profits[i - 1][j - p.weights[i - 1]], profits[i - 1][j], 
       currentSolution, solutions[i - 1][j], i, j);
 
     currentSolution := currentSolution + [1];
-    assert |currentSolution| == i;
 
-    assert currentSolution[..|currentSolution| - 1] == solutions[i - 1][j - p.weights[i - 1]];
     GainAdd1(p, currentSolution);
-    // assert gain(p, currentSolution) == gain(p, currentSolution[..|currentSolution| - 1]) + p.gains[i - 1] == currentProfit;
 
     assert isOptimalPartialSolution(p, currentSolution, i, j);        
 }
 
-method solveAdd0BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
-  requires isValidProblem(p)
-  requires 0 < i <= p.n
-  requires i == |profits| == |solutions|
-  requires 1 <= j <= p.c
+method solveAdd0BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+                             i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
-  requires forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == k
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> hasAllowedValues(solutions[k][q])
-
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                    isOptimalPartialSolution(p, solutions[k][q], k, q) 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                gain(p, solutions[k][q]) == profits[k][q]
-
-  requires |partialSolutions| == |partialProfits| == j
-  requires forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-  requires forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k) 
-  requires forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
+  requires hasValidBounds(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
   
   requires p.weights[i - 1] <= j
   requires p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]] <= profits[i - 1][j]
 
   ensures isOptimalPartialSolution(p, currentSolution, i, j)
-  ensures currentProfit == gain(p, currentSolution)
-                
+  ensures currentProfit == gain(p, currentSolution)          
 {
     currentProfit := profits[i - 1][j];
     currentSolution := solutions[i - 1][j];
 
     ComputeWeightFits0(p, currentSolution, j);
-    assert weight(p, currentSolution) <= j;
 
     OptimalSolAdd0(p, profits[i - 1][j - p.weights[i - 1]], profits[i - 1][j], 
       solutions[i - 1][j - p.weights[i - 1]], currentSolution, i, j);
 
     currentSolution := currentSolution + [0];
-    assert |currentSolution| == i;
     
     GainAdd0(p, currentSolution);
 
     assert isOptimalPartialSolution(p, currentSolution, i, j);   
 }
 
-ghost predicate validPartialSolutions(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) 
+method SolveAdd0TooBig(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+                       i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
-{
-  isValidProblem(p) && 1 < i <= p.n && 
-  |profits| == |solutions| == i && 
-  (forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1) && 
-  (forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| <= p.c == |profits[k]| ==> (hasAllowedValues(solutions[k][q]) && 
-  |solutions[k][q]| == k && isOptimalPartialSolution(p, solutions[k][q], k, q) && gain(p, solutions[k][q]) == profits[k][q])) && 
-  
-  1 <= j <= p.c && 
-  |partialProfits| == |partialSolutions| == j && 
-  (forall k :: 0 <= k < |partialSolutions| ==> (hasAllowedValues(partialSolutions[k]) && 
-  isOptimalPartialSolution(p, partialSolutions[k], i, k) && gain(p, partialSolutions[k]) == partialProfits[k]))
-}
-
-method SolveAdd0TooBig(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
-  requires isValidProblem(p)
-  requires 0 < i <= p.n
-  requires i == |profits| == |solutions|
-  requires 1 <= j <= p.c
-
-  requires forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> |solutions[k][q]| == k
-  requires forall k :: 0 <= k < i ==> forall q :: 0 <= q < |solutions[k]| ==> hasAllowedValues(solutions[k][q])
-
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                    isOptimalPartialSolution(p, solutions[k][q], k, q) 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
-                gain(p, solutions[k][q]) == profits[k][q]
-
-  requires |partialSolutions| == |partialProfits| == j
-  requires forall k :: 0 <= k < |partialSolutions| ==> hasAllowedValues(partialSolutions[k])
-  requires forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k) 
-  requires forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
-
-  // requires isOk(p, profits, solutions, partialProfits, partialSolutions, i, j)
+  requires hasValidBounds(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
 
   requires p.weights[i - 1] > j
 
   ensures isOptimalPartialSolution(p, currentSolution, i, j)
-  ensures currentProfit == gain(p, currentSolution)
-                
+  ensures currentProfit == gain(p, currentSolution)     
 {
     currentProfit := profits[i - 1][j];
     currentSolution := solutions[i - 1][j];
 
     ComputeWeightFits0(p, currentSolution, j);
-    assert weight(p, currentSolution) <= j;
-    assert isPartialSolution(p, currentSolution, i - 1, j);
 
     OptimalSolAdd0TooBig(p, currentSolution, i, j);
 
     currentSolution := currentSolution + [0];
-    assert |currentSolution| == i;
-    assert isPartialSolution(p, currentSolution, i, j);
     
     GainAdd0(p, currentSolution);
 
