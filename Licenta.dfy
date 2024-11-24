@@ -7,29 +7,19 @@ function gain(p: Problem, solution: Solution): int
   requires hasAllowedValues(solution)
   requires 0 <= |solution| <= p.n
 {
-  if |solution| == 0 then 0 else computeGain(p.gains, solution, |solution| - 1)
+  if |solution| == 0 then 0 else computeGain(p, solution, |solution| - 1)
 }
 
-function computeGain(gains: seq<int>, solution: Solution, i: int) : int
-  requires 0 <= i < |solution|
-  requires 0 <= i < |gains|
-  requires hasAllowedValues(solution)
-  requires 0 <= |solution| <= |gains|
-{
-  if i == 0 then solution[0] * gains[0] else solution[i] * gains[i] + computeGain(gains, solution, i - 1)
-}
-
-function computeGainNew(p: Problem, solution: Solution, i: int) : int //try to remove it
+function computeGain(p: Problem, solution: Solution, i: int) : int
   requires isValidProblem(p)
   requires 0 <= i < |solution|
   requires 0 <= i < |p.gains|
   requires hasAllowedValues(solution)
   requires 0 <= |solution| <= |p.gains|
 
-  ensures computeGainNew(p, solution, i) == computeGain(p.gains, solution, i)
-  ensures computeGainNew(p, solution, i) >= 0
+  ensures computeGain(p, solution, i) >= 0
 {
-  if i == 0 then solution[0] * p.gains[0] else solution[i] * p.gains[i] + computeGainNew(p, solution, i - 1)
+  if i == 0 then solution[0] * p.gains[0] else solution[i] * p.gains[i] + computeGain(p, solution, i - 1)
 }
 
 function weight(p: Problem, solution: Solution): int
@@ -37,19 +27,19 @@ function weight(p: Problem, solution: Solution): int
   requires hasAllowedValues(solution)
   requires 0 <= |solution| <= p.n
 {
-  if |solution| == 0 then 0 else computeWeight(p.weights, solution, |solution| - 1)
+  if |solution| == 0 then 0 else computeWeight(p, solution, |solution| - 1)
 }
 
-function computeWeight(weights: seq<int>, solution: Solution, i: int) : int
- requires forall i :: 0 <= i < |weights| ==> weights[i] > 0 
+function computeWeight(p: Problem, solution: Solution, i: int) : int
+  requires forall i :: 0 <= i < |p.weights| ==> p.weights[i] > 0 
   requires 0 <= i < |solution|
-  requires 0 <= i < |weights|
+  requires 0 <= i < |p.weights|
   requires hasAllowedValues(solution)
-  requires 0 <= |solution| <= |weights|
+  requires 0 <= |solution| <= |p.weights|
   
-  ensures computeWeight(weights, solution, i) >= 0
+  ensures computeWeight(p, solution, i) >= 0
 {
-  if i == 0 then solution[0] * weights[0] else solution[i] * weights[i] + computeWeight(weights, solution, i - 1)
+  if i == 0 then solution[0] * p.weights[0] else solution[i] * p.weights[i] + computeWeight(p, solution, i - 1)
 }
 
 function SumAllGains(p: Problem, i: int) : int
@@ -77,7 +67,6 @@ predicate isValidProblem(p: Problem)
   p.n > 0 && p.c >= 0 && 
   hasPositiveValues(p.gains) && hasPositiveValues(p.weights) 
 }
-
 
 predicate isValidPartialSolution(p: Problem, solution: Solution)
   requires isValidProblem(p)
@@ -128,8 +117,8 @@ predicate hasValidBounds(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<
   i == |profits| == |solutions|
 }
 
-ghost predicate areValidSolutions(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, i: int, j: int)
-  requires hasValidBounds(p, profits, solutions, i, j)
+ghost predicate areValidSolutions(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, i: int)
+  requires hasValidBounds(p, profits, solutions, i, p.c)
 {
   (forall k :: 0 <= k < i ==> |profits[k]| == |solutions[k]| == p.c + 1) && 
   (forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
@@ -148,33 +137,35 @@ ghost predicate areValidPartialSolutions(p: Problem, profits: seq<seq<int>>, sol
   (forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k])
 }
 
+
+// lemma which proves that adding 1 to a solution it will not exceed capacity j
 lemma ComputeWeightFits1(p: Problem, solution: Solution, i: int, j: int)
   requires isValidProblem(p)
   requires 0 <= |solution| < p.n
-  requires 0 <= i < |p.weights|
   requires hasAllowedValues(solution)
   requires 0 <= j <= p.c + 1
-  requires weight(p, solution) <= j - p.weights[i]
   requires i == |solution|
+  requires weight(p, solution) <= j - p.weights[i]
   
-  ensures computeWeight(p.weights, solution + [1], |solution + [1]| - 1) <= j
+  ensures computeWeight(p, solution + [1], |solution + [1]| - 1) <= j
 {
   var s' := solution + [1];
   assert solution == s'[..|s'| - 1];
 
   for a := 0 to |s'[..|s'| - 1]|
     invariant 0 <= a <= |s'[..|s'| - 1]| + 1
-    invariant forall k :: 0 <= k < a ==> computeWeight(p.weights, solution, k) == computeWeight(p.weights, s', k)
+    invariant forall k :: 0 <= k < a ==> computeWeight(p, solution, k) == computeWeight(p, s', k)
   { }
 }
 
+// lemma which proves that adding 0 to a solution will not exceed capacity j
 lemma ComputeWeightFits0(p: Problem, solution: Solution, j: int)
   requires isValidProblem(p)
   requires hasAllowedValues(solution)
   requires 0 <= |solution| < p.n
   requires weight(p, solution) <= j
   
-  ensures computeWeight(p.weights, solution + [0], |solution + [0]| - 1) <= j 
+  ensures computeWeight(p, solution + [0], |solution + [0]| - 1) <= j 
 {  
   if |solution| == 0 {
     assert weight(p, solution) <= j;
@@ -182,7 +173,7 @@ lemma ComputeWeightFits0(p: Problem, solution: Solution, j: int)
     var s' := solution + [0];
     assert s'[..|s'| - 1] == solution;
     ComputeWeightAdd0(p, s', |s'| - 2);
-    assert computeWeight(p.weights, solution + [0], |solution + [0]| - 1) <= j;
+    assert computeWeight(p, solution + [0], |solution + [0]| - 1) <= j;
   }
 }
 
@@ -190,11 +181,10 @@ lemma ComputeWeightAdd0(p: Problem, solution: Solution, i: int)
   requires isValidProblem(p)
   requires hasAllowedValues(solution)
   requires 0 <= i < |solution| - 1
-  requires 0 <= i < |p.weights|
   requires 0 <= |solution| <= |p.weights|
   requires solution[|solution| - 1] == 0
   
-  ensures computeWeight(p.weights, solution, i) == computeWeight(p.weights, solution[..|solution| - 1], i)
+  ensures computeWeight(p, solution, i) == computeWeight(p, solution[..|solution| - 1], i)
 { }
 
 lemma WeightAdd0(p: Problem, solution: Solution)
@@ -208,20 +198,19 @@ lemma WeightAdd0(p: Problem, solution: Solution)
   if |solution| == 1 {
 
   } else {
-    assert computeWeight(p.weights, solution, |solution| - 1) == computeWeight(p.weights, solution, |solution| - 2);
+    assert computeWeight(p, solution, |solution| - 1) == computeWeight(p, solution, |solution| - 2);
     ComputeWeightAdd0(p, solution, |solution| - 2);
   }
- }
+}
 
 lemma ComputeGainAdd0(p: Problem, solution: Solution, i: int)
   requires isValidProblem(p)
   requires hasAllowedValues(solution)
   requires 0 <= i < |solution| - 1
-  requires 0 <= i < |p.gains|
   requires 0 <= |solution| <= |p.gains|
   requires solution[|solution| - 1] == 0
   
-  ensures computeGain(p.gains, solution, i) == computeGain(p.gains, solution[..|solution| - 1], i)
+  ensures computeGain(p, solution, i) == computeGain(p, solution[..|solution| - 1], i)
 { }
 
 lemma GainAdd0(p: Problem, solution: Solution)
@@ -235,7 +224,7 @@ lemma GainAdd0(p: Problem, solution: Solution)
   if |solution| == 1 {
 
   } else {
-    assert computeGain(p.gains, solution, |solution| - 1) == computeGain(p.gains, solution, |solution| - 2);
+    assert computeGain(p, solution, |solution| - 1) == computeGain(p, solution, |solution| - 2);
     ComputeGainAdd0(p, solution, |solution| - 2);
   }
 }
@@ -246,7 +235,7 @@ lemma ComputeGainRemoveLast(p: Problem, solution: Solution, i: int)
   requires 0 <= i < |solution| <= |p.gains|
   requires i <= |solution[..|solution| - 1]| - 1
 
-  ensures computeGain(p.gains, solution, i) == computeGain(p.gains, solution[..|solution| - 1], i)
+  ensures computeGain(p, solution, i) == computeGain(p, solution[..|solution| - 1], i)
 { 
   assert solution == solution[..|solution| - 1] + [solution[|solution| - 1]];
 }
@@ -263,8 +252,8 @@ lemma GainAdd1(p: Problem, solution: Solution)
 
   } else {
     ComputeGainRemoveLast(p, solution, |solution[..|solution| - 1]| - 1);
-    assert computeGain(p.gains, solution, |solution[..|solution| - 1]| - 1) == 
-           computeGain(p.gains, solution[..|solution| - 1], |solution[..|solution| - 1]| - 1);
+    assert computeGain(p, solution, |solution[..|solution| - 1]| - 1) == 
+           computeGain(p, solution[..|solution| - 1], |solution[..|solution| - 1]| - 1);
   }
 }
 
@@ -275,7 +264,7 @@ lemma ComputeWeightRemoveLast(p: Problem, solution: Solution, i: int)
   requires solution == solution[..|solution| - 1] + [solution[|solution| - 1]] 
   requires i <= |solution[..|solution| - 1]| - 1
 
-  ensures computeWeight(p.weights, solution, i) == computeWeight(p.weights, solution[..|solution| - 1], i)
+  ensures computeWeight(p, solution, i) == computeWeight(p, solution[..|solution| - 1], i)
 { }
 
 lemma WeightAdd1(p: Problem, solution: Solution)
@@ -290,8 +279,8 @@ lemma WeightAdd1(p: Problem, solution: Solution)
 
   } else {
     ComputeWeightRemoveLast(p, solution, |solution[..|solution| - 1]| - 1);
-    assert computeWeight(p.weights, solution, |solution[..|solution| - 1]| - 1) == 
-           computeWeight(p.weights, solution[..|solution| - 1], |solution[..|solution| - 1]| - 1);
+    assert computeWeight(p, solution, |solution[..|solution| - 1]| - 1) == 
+           computeWeight(p, solution[..|solution| - 1], |solution[..|solution| - 1]| - 1);
   }
 }
 
@@ -313,67 +302,67 @@ lemma emptySolOptimal(p: Problem, solution: Solution, i: int, j: int)
 lemma ComputeWeightAllZeros(p: Problem, solution: Solution, i: int)
   requires isValidProblem(p)
   requires 0 <= i < |solution|
-  requires 0 <= i < |p.weights|
   requires 0 <= |solution| <= p.n 
   requires forall k :: 0 <= k < |solution| ==> solution[k] == 0
   
-  ensures computeWeight(p.weights, solution, i) == 0
+  ensures computeWeight(p, solution, i) == 0
 {
   if i == 0 {
-    assert  computeWeight(p.weights, solution, i) == 0;
+    assert  computeWeight(p, solution, i) == 0;
   } else {
     ComputeWeightAllZeros(p, solution, i - 1);
-    assert computeWeight(p.weights, solution, i - 1) == 0;
-    assert computeWeight(p.weights, solution, i) == 0;
+    assert computeWeight(p, solution, i - 1) == 0;
+    assert computeWeight(p, solution, i) == 0;
   }
 }
 
 lemma ComputeGainAllZeros(p: Problem, solution: Solution, i: int)
   requires isValidProblem(p)
   requires 0 <= i < |solution|
-  requires 0 <= i < |p.gains|
   requires 0 <= |solution| <= p.n 
   requires forall k :: 0 <= k < |solution| ==> solution[k] == 0
   
-  ensures computeGain(p.gains, solution, i) == 0
+  ensures computeGain(p, solution, i) == 0
 {
   if i == 0 {
-    assert  computeGain(p.gains, solution, i) == 0;
+    assert  computeGain(p, solution, i) == 0;
   } else {
     ComputeGainAllZeros(p, solution, i - 1);
-    assert computeGain(p.gains, solution, i - 1) == 0;
-    assert computeGain(p.gains, solution, i) == 0;
+    assert computeGain(p, solution, i - 1) == 0;
+    assert computeGain(p, solution, i) == 0;
   }
 }
 
+// lemma which proves that if a partial solution has weight 0, then any subsolution will have weight 0 as well
 lemma {:induction false} ComputeWeightCapacity0(p: Problem, solution: Solution, i: int, idx: int, x: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
  requires 0 <= |solution| <= p.n
  requires isPartialSolution(p, solution, i, 0)
  requires 0 <= x <= |solution| - 1
- requires computeWeight(p.weights, solution, x) == 0
+ requires computeWeight(p, solution, x) == 0
  requires 0 <= idx <= x
  
- ensures computeWeight(p.weights, solution, idx) == 0
+ ensures computeWeight(p, solution, idx) == 0
 {
   if idx == x {
-    assert computeWeight(p.weights, solution, idx) == 0;
+    assert computeWeight(p, solution, idx) == 0;
   } else {
-    assert computeWeight(p.weights, solution, x - 1) == 0 by 
+    assert computeWeight(p, solution, x - 1) == 0 by 
     {
       assert 0 <= idx < x;
-      assert computeWeight(p.weights, solution, x) == 0;
+      assert computeWeight(p, solution, x) == 0;
       assert p.weights[x] > 0;
       assert 0 <= solution[x] <= 1;
       assert solution[x] * p.weights[x] >= 0;
-      assert computeWeight(p.weights, solution, x) == solution[x] * p.weights[x] + computeWeight(p.weights, solution, x - 1);
+      assert computeWeight(p, solution, x) == solution[x] * p.weights[x] + computeWeight(p, solution, x - 1);
     }
     ComputeWeightCapacity0(p, solution, i, idx, x - 1);
-    assert computeWeight(p.weights, solution, idx) == 0;
+    assert computeWeight(p, solution, idx) == 0;
   }
 }
 
+// lemma which proves that if a partial solution for capacity 0 with only zeros will have a gain of 0
 lemma GainCapacity0(p: Problem, solution: Solution, i: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
@@ -386,11 +375,11 @@ lemma GainCapacity0(p: Problem, solution: Solution, i: int)
   while idx < |solution|
     invariant 0 <= idx <= |solution|
     invariant forall k :: 0 <= k < idx ==> solution[k] == 0
-    invariant idx > 0 ==> computeWeight(p.weights, solution, idx - 1) == 0
+    invariant idx > 0 ==> computeWeight(p, solution, idx - 1) == 0
   {
     assert p.weights[idx] > 0;
     ComputeWeightCapacity0(p, solution, i, idx, |solution| - 1);
-    assert p.weights[idx] > 0 && computeWeight(p.weights, solution, idx) == 0 ==> solution[idx] == 0;
+    assert p.weights[idx] > 0 && computeWeight(p, solution, idx) == 0 ==> solution[idx] == 0;
     idx := idx + 1;
   }
   assert forall k :: 0 <= k < |solution| ==> solution[k] == 0;
@@ -398,10 +387,10 @@ lemma GainCapacity0(p: Problem, solution: Solution, i: int)
   assert gain(p, solution) == 0;
 }
 
+// lemma which proves that for allowed capacity j = 0, a solution with gain 0 is optimal
 lemma OptimalSolCapacity0(p: Problem, solution: Solution, i: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
- requires 1 <= i <= |p.gains|
  requires isPartialSolution(p, solution, i, 0)
  requires forall k :: 0 <= k < |solution| ==> solution[k] == 0
  requires weight(p, solution) == 0
@@ -423,6 +412,8 @@ lemma OptimalSolCapacity0(p: Problem, solution: Solution, i: int)
   assert isOptimalPartialSolution(p, solution, i, 0);
 }
 
+// this lemma is a helper for OptimalSolAdd0, x is an assumed better solution than solution2 + [0], solution2 is the optimal solution when
+// considering the first i - 1 objects; adding a zero to solution2 will obtain a profit as good as x
 lemma GainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, x: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
@@ -430,7 +421,7 @@ lemma GainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solutio
  requires p.weights[i - 1] <= j
  requires isOptimalPartialSolution(p, solution1, i - 1, j - p.weights[i - 1])
  requires isOptimalPartialSolution(p, solution2, i - 1, j)
- requires computeWeight(p.weights, solution2 + [0], |solution2 + [0]| - 1) <= j
+ requires computeWeight(p, solution2 + [0], |solution2 + [0]| - 1) <= j
  requires profit1 == gain(p, solution1)
  requires profit2 == gain(p, solution2)
  requires p.gains[i - 1] + profit1 <= profit2
@@ -457,7 +448,7 @@ lemma GainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solutio
   assert gain(p, x' + [0]) == gain(p, x) == gain(p, solution2 + [0]);
 }
 
-lemma OptimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2:Solution, i: int, j: int)
+lemma OptimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, i: int, j: int)
                                     // profit1 = profits[i - 1][j - p.weights[i - 1]] 
                                     // profit2 = profits[i - 1][j] 
  requires isValidProblem(p)
@@ -466,7 +457,7 @@ lemma OptimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution
  requires p.weights[i - 1] <= j
  requires isOptimalPartialSolution(p, solution1, i - 1, j - p.weights[i - 1])
  requires isOptimalPartialSolution(p, solution2, i - 1, j)
- requires computeWeight(p.weights, solution2 + [0], |solution2 + [0]| - 1) <= j
+ requires computeWeight(p, solution2 + [0], |solution2 + [0]| - 1) <= j
  requires profit1 == gain(p, solution1)
  requires profit2 == gain(p, solution2)
  requires p.gains[i - 1] + profit1 <= profit2
@@ -495,10 +486,10 @@ lemma OptimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution
   }
 }
 
+// if the last element's weight is bigger than allowed capacity j then it means the last element must be 0
 lemma GainAddTooBig(p: Problem, solution: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
- requires 1 <= i <= |p.gains|
  requires 1 <= j <= p.c
  requires isPartialSolution(p, solution, i, j)
  requires |solution| >= 2
@@ -508,8 +499,8 @@ lemma GainAddTooBig(p: Problem, solution: Solution, i: int, j: int)
  ensures gain(p, solution[..i - 1]) == gain(p, solution)
  {
     if solution[i - 1] == 1 {
-      assert computeWeight(p.weights, solution, |solution| - 1) == 
-        computeWeight(p.weights, solution, |solution[..i]| - 1) + p.weights[i - 1];
+      assert computeWeight(p, solution, |solution| - 1) == 
+        computeWeight(p, solution, |solution[..i]| - 1) + p.weights[i - 1];
       assert weight(p, solution) >= p.weights[i - 1] > j;
       assert !isPartialSolution(p, solution, i, j);
       assert false;
@@ -526,14 +517,14 @@ lemma GainUpperBound(p: Problem, solution: Solution, i: int)
  requires 0 <= |solution| <= |p.gains|
  requires isValidPartialSolution(p, solution) && |solution| >= i 
 
- ensures computeGainNew(p, solution, i - 1) <= SumAllGains(p, i)
+ ensures computeGain(p, solution, i - 1) <= SumAllGains(p, i)
 {
   var completeSol := seq(i, y => 1);
   assert forall q :: 0 <= q < i ==> completeSol[q] == 1;
-  var sumAllGains := computeGainNew(p, completeSol, |completeSol| - 1);
+  var sumAllGains := computeGain(p, completeSol, |completeSol| - 1);
   if i > 1 { 
     GainUpperBound(p, solution, i - 1);
-    assert computeGainNew(p, solution, i - 2) <= SumAllGains(p, i - 1);
+    assert computeGain(p, solution, i - 2) <= SumAllGains(p, i - 1);
   } else {
   }
 }
@@ -556,7 +547,7 @@ lemma ExistsOptimalPartialSol(p: Problem, i: int, j: int)
     var currentSol := seq(i, y => 0);
     ComputeWeightAllZeros(p, currentSol, |currentSol| - 1);
     ComputeGainAllZeros(p, currentSol, |currentSol| - 1);
-    assert computeGain(p.gains, currentSol, |currentSol| - 1) == 0 >= q;
+    assert computeGain(p, currentSol, |currentSol| - 1) == 0 >= q;
     assert sumAllGains == SumAllGains(p, i);
 
     while q < sumAllGains + 1
@@ -564,18 +555,18 @@ lemma ExistsOptimalPartialSol(p: Problem, i: int, j: int)
       invariant !exists s :: isOptimalPartialSolution(p, s, i, j)
       invariant !isOptimalPartialSolution(p, currentSol, i, j)
       invariant isPartialSolution(p, currentSol, i, j)
-      invariant computeGain(p.gains, currentSol, |currentSol| - 1) >= q
+      invariant computeGain(p, currentSol, |currentSol| - 1) >= q
     {
       assert exists s_i :: isPartialSolution(p, s_i, i, j) && gain(p, s_i) > gain(p, currentSol);
       var s_i :| isPartialSolution(p, s_i, i, j) && gain(p, s_i) > gain(p, currentSol);
       
       currentSol := s_i;
-      q := computeGain(p.gains, s_i, |s_i| - 1);
+      q := computeGain(p, s_i, |s_i| - 1);
       GainUpperBound(p, s_i, i);
 
     }
     
-    assert computeGainNew(p, currentSol, |currentSol| - 1) >= sumAllGains + 1;
+    assert computeGain(p, currentSol, |currentSol| - 1) >= sumAllGains + 1;
     GainUpperBound(p, currentSol, i);
     assert false;
   }
@@ -586,7 +577,7 @@ lemma OptimalSolAdd0TooBig(p: Problem, solution: Solution, i: int, j: int)
  requires 1 <= i <= p.n
  requires 1 <= j <= p.c
  requires isOptimalPartialSolution(p, solution, i - 1, j)
- requires computeWeight(p.weights, solution + [0], |solution + [0]| - 1) <= j 
+ requires computeWeight(p, solution + [0], |solution + [0]| - 1) <= j 
  requires p.weights[i - 1] > j
 
  ensures isOptimalPartialSolution(p, solution + [0], i, j)
@@ -616,6 +607,8 @@ lemma OptimalSolAdd0TooBig(p: Problem, solution: Solution, i: int, j: int)
   }
 }
 
+// if solution is optimal for i objects and capacity j, if the last element which is 1 will be removed, 
+// then solution remains optimal for i - 1 objects and capacity j - p.weights[i - 1]
 lemma OptimalSolRemove1(p: Problem, solution: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
@@ -648,6 +641,8 @@ lemma OptimalSolRemove1(p: Problem, solution: Solution, i: int, j: int)
   }
 }
 
+// if solution is optimal for i objects and capacity j, if the last element which is 0 will be removed, 
+// then solution remains optimal for i - 1 objects and capacity j - p.weights[i - 1]
 lemma OptimalSolRemove0(p: Problem, solution: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
@@ -679,6 +674,8 @@ lemma OptimalSolRemove0(p: Problem, solution: Solution, i: int, j: int)
   }
 }
 
+// this lemma is a helper for OptimalSolAdd1, x is an assumed better solution than solution1 + [1], solution1 is the optimal solution if
+// the first i - 1 objects are taken; adding a one to solution1 will obtain a profit as good as x
 lemma GainAdd1Optimal(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, x: Solution, i: int, j: int)
  requires isValidProblem(p)
  requires 1 <= i <= p.n
@@ -686,7 +683,7 @@ lemma GainAdd1Optimal(p: Problem, profit1: int, profit2: int, solution1: Solutio
  requires p.weights[i - 1] <= j
  requires isOptimalPartialSolution(p, solution1, i - 1, j - p.weights[i - 1])
  requires isOptimalPartialSolution(p, solution2, i - 1, j)
- requires computeWeight(p.weights, solution1 + [1], |solution1 + [1]| - 1) <= j
+ requires computeWeight(p, solution1 + [1], |solution1 + [1]| - 1) <= j
  requires p.gains[i - 1] + profit1 > profit2
  requires isOptimalPartialSolution(p, x, i, j)
  requires x[i - 1] == 1
@@ -714,7 +711,7 @@ lemma OptimalSolAdd1(p: Problem, profit1: int, profit2: int, solution1: Solution
  requires p.weights[i - 1] <= j
  requires isOptimalPartialSolution(p, solution1, i - 1, j - p.weights[i - 1])
  requires isOptimalPartialSolution(p, solution2, i - 1, j)
- requires computeWeight(p.weights, solution1 + [1], |solution1 + [1]| - 1) <= j
+ requires computeWeight(p, solution1 + [1], |solution1 + [1]| - 1) <= j
  requires profit1 == gain(p, solution1)
  requires profit2 == gain(p, solution2)
  requires p.gains[i - 1] + profit1 > profit2
@@ -725,8 +722,8 @@ lemma OptimalSolAdd1(p: Problem, profit1: int, profit2: int, solution1: Solution
 
   if !isOptimalPartialSolution(p, s, i, j){
     ExistsOptimalPartialSol(p, i, j);
-
     var x : seq<int> :| isOptimalPartialSolution(p, x, i, j);
+
     assert gain(p, x) > gain(p, solution1 + [1]);
     if x[i - 1] == 0 {
       assert gain(p, x) <= profit2 by 
@@ -749,6 +746,7 @@ lemma OptimalSolAdd1(p: Problem, profit1: int, profit2: int, solution1: Solution
   }
 }
 
+// the optimal solution/obtained profit for the n objects and capacity c will be the last element from solutions/profits
 method Solve(p: Problem) returns (profit: int, solution: Solution)
   requires isValidProblem(p)
   
@@ -795,6 +793,7 @@ method Solve(p: Problem) returns (profit: int, solution: Solution)
     profit := profits[p.n][p.c];
 }
 
+// the case when no object is considered, optimal will be empty solutions with gain 0
 method Solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) 
                   returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
 
@@ -816,7 +815,6 @@ method Solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
           invariant |partialProfits| == j
           invariant |partialSolutions| == j
 
-          invariant |partialSolutions| > 0 ==> forall k :: 0 <= k < |partialSolutions| ==> |partialSolutions[k]| == i 
           invariant forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
           invariant forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
         {
@@ -835,8 +833,8 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
   requires isValidProblem(p)
   requires 0 < i < p.n + 1
   requires i == |profits| == |solutions|
-  requires forall k :: 0 <= k < i ==> |profits[k]| == p.c + 1
 
+  requires forall k :: 0 <= k < i ==> |profits[k]| == p.c + 1
   requires forall k :: 0 <= k < i ==> |solutions[k]| == p.c + 1
   requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> isOptimalPartialSolution(p, solutions[k][q], k, q) 
   requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> gain(p, solutions[k][q]) == profits[k][q]
@@ -861,7 +859,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
         {
           if j == 0 {
 
-              var currentProfit, currentSolution := solveCapacity0(p, i, j);
+              var currentProfit, currentSolution := solvesCapacity0(p, i, j);
               partialProfits := partialProfits + [currentProfit];
               partialSolutions := partialSolutions + [currentSolution];
 
@@ -871,7 +869,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
             if p.weights[i - 1] <= j {
               if p.gains[i - 1] + profits[i - 1][j - p.weights[i - 1]] > profits[i - 1][j] {
 
-                  var currentProfit, currentSolution := solveAdd1BetterProfit(p, profits, solutions, partialProfits, partialSolutions, i, j);
+                  var currentProfit, currentSolution := solvesAdd1BetterProfit(p, profits, solutions, partialProfits, partialSolutions, i, j);
                   partialProfits := partialProfits + [currentProfit];
                   partialSolutions := partialSolutions + [currentSolution];
 
@@ -879,7 +877,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
 
               } else {
 
-                  var currentProfit, currentSolution := solveAdd0BetterProfit(p, profits, solutions, partialProfits, partialSolutions, i, j);
+                  var currentProfit, currentSolution := solvesAdd0BetterProfit(p, profits, solutions, partialProfits, partialSolutions, i, j);
                   partialProfits := partialProfits + [currentProfit];
                   partialSolutions := partialSolutions + [currentSolution];
 
@@ -888,7 +886,7 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
               }
             } else {
 
-                var currentProfit, currentSolution := SolveAdd0TooBig(p, profits, solutions, partialProfits, partialSolutions, i, j);
+                var currentProfit, currentSolution := solvesAdd0TooBig(p, profits, solutions, partialProfits, partialSolutions, i, j);
                 partialProfits := partialProfits + [currentProfit];
                 partialSolutions := partialSolutions + [currentSolution];
 
@@ -901,7 +899,8 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
         }
 }
 
-method solveCapacity0(p: Problem, i: int, j: int) returns (currentProfit: int, currentSolution: Solution)
+// the case when allowed capacity is 0, so no object can be taken since every object's weight is bigger than 0
+method solvesCapacity0(p: Problem, i: int, j: int) returns (currentProfit: int, currentSolution: Solution)
   requires isValidProblem(p)
   requires 1 <= i <= p.n
   requires j == 0
@@ -920,11 +919,12 @@ method solveCapacity0(p: Problem, i: int, j: int) returns (currentProfit: int, c
     assert isOptimalPartialSolution(p, currentSolution, i, j);
 }
 
-method solveAdd1BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+// the case when a better profit is obtained if the object is taken into the knapsack
+method solvesAdd1BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
                              i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
   requires hasValidBounds(p, profits, solutions, i, j)
-  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i)
   requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
   
   requires p.weights[i - 1] <= j
@@ -948,11 +948,12 @@ method solveAdd1BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<
     assert isOptimalPartialSolution(p, currentSolution, i, j);        
 }
 
-method solveAdd0BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+// the case when a better profit is not obtained if the object is taken into the knapsack
+method solvesAdd0BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
                              i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
   requires hasValidBounds(p, profits, solutions, i, j)
-  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i)
   requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
   
   requires p.weights[i - 1] <= j
@@ -976,11 +977,12 @@ method solveAdd0BetterProfit(p: Problem, profits: seq<seq<int>>, solutions: seq<
     assert isOptimalPartialSolution(p, currentSolution, i, j);   
 }
 
-method SolveAdd0TooBig(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
+// the case when the weight of the object will exceed the knapsack capacity j
+method solvesAdd0TooBig(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, partialProfits: seq<int>, partialSolutions: seq<seq<int>>, 
                        i: int, j: int) returns (currentProfit: int, currentSolution: seq<int>)
 
   requires hasValidBounds(p, profits, solutions, i, j)
-  requires areValidSolutions(p, profits, solutions, i, j)
+  requires areValidSolutions(p, profits, solutions, i)
   requires areValidPartialSolutions(p, profits, solutions, partialProfits, partialSolutions, i, j)
 
   requires p.weights[i - 1] > j
@@ -1008,7 +1010,7 @@ method Main()
                                     gains := [1, 2, 5, 6], weights := [2, 3, 4, 5]);
     var maximProfit, finalSolution := Solve(p);
 
-    print "\n Maximum profit is: ";
+    print "\n Maxim profit is: ";
     print maximProfit;
 
     print "\n Optimal solution is: ";
