@@ -1,0 +1,9 @@
+\chapter*{Introducere} 
+\addcontentsline{toc}{chapter}{Introducere}
+
+În acest capitol introductiv voi face o scurtă prezentare a limbajului Dafny, urmată apoi de niște informații despre paradigma programării dinamice și câteva detalii despre Problema Rucsacului. \par
+Dafny este un limbaj de programare funcțional destinat verificării formale a corectudinii programelor. A fost creat pentru a ajuta programatorii să scrie cod care este corect din punct de vedere al specificațiilor. Un lucru foarte interesant de știut despre acest limbaj este faptul că a fost conceput astfel încât permite verificarea codului încă din faza de dezvoltare, înainte de a rula codul. Datorită faptului că verificatorul Dafny este rulat ca parte a compilatorului, orice eroare matematică sau logică va fi semnalată către programator care va trebui să ajute verificatorul prin ajustarea specificațiilor sau a logicii. Două exemple foarte simple pentru astfel de specificații sunt următoarele:
+\begin{itemize}
+    \item requires n \textgreater  0, precondiție care ne va garanta ca numărul de obiecte dat la intrare este mai mare decât 0;
+    \item ensures sum \textgreater  0, postcondiție care va garanta că suma obținută la ieșire va fi mereu mai mare decât 0.
+\end{itemize}
