@@ -9,6 +9,7 @@
 \usepackage{indentfirst}        % indentation
 \usepackage[nottoc]{tocbibind}  % table of contents style
 \usepackage[unicode]{hyperref}  % references from the table of contents
+\usepackage[most]{tcolorbox}    % used for text boxes
 
 % includes options
 \geometry{  a4paper,            % scientific thesis standard
@@ -17,6 +18,12 @@
             top=2cm,
             bottom=2cm,
  }
+
+\newtcolorbox{textbox}[1][]{
+sharp corners,
+enhanced,
+colback=white
+}
 \graphicspath{{images/}}        % path where the images are located
 \setlength{\parindent}{1cm}     % paragraph indentation
 

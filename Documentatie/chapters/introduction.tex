@@ -1,9 +1,34 @@
 \chapter*{Introducere} 
 \addcontentsline{toc}{chapter}{Introducere}
 
-În acest capitol introductiv voi face o scurtă prezentare a limbajului Dafny, urmată apoi de niște informații despre paradigma programării dinamice și câteva detalii despre Problema Rucsacului. \par
+În acest capitol introductiv voi face o scurtă prezentare a limbajului Dafny, urmată apoi de niște informații despre paradigma programării dinamice și câteva detalii despre Problema Rucsacului.
+
+\subsection*{Dafny}
 Dafny este un limbaj de programare funcțional destinat verificării formale a corectudinii programelor. A fost creat pentru a ajuta programatorii să scrie cod care este corect din punct de vedere al specificațiilor. Un lucru foarte interesant de știut despre acest limbaj este faptul că a fost conceput astfel încât permite verificarea codului încă din faza de dezvoltare, înainte de a rula codul. Datorită faptului că verificatorul Dafny este rulat ca parte a compilatorului, orice eroare matematică sau logică va fi semnalată către programator care va trebui să ajute verificatorul prin ajustarea specificațiilor sau a logicii. Două exemple foarte simple pentru astfel de specificații sunt următoarele:
 \begin{itemize}
-    \item requires n \textgreater  0, precondiție care ne va garanta ca numărul de obiecte dat la intrare este mai mare decât 0;
-    \item ensures sum \textgreater  0, postcondiție care va garanta că suma obținută la ieșire va fi mereu mai mare decât 0.
+    \item requires \( n > 0 \), precondiție care ne va garanta ca numărul de obiecte dat la intrare este mai mare decât 0;
+    \item ensures \(sum >  0\), postcondiție care va garanta că suma obținută la ieșire va fi mereu mai mare decât 0.
 \end{itemize}
+
+\subsection*{Programarea dinamică}
+Programarea dinamică este o metodă de rezolvare a problemelor complexe și se bazează pe conceptul de suprapunere al subproblemelor, însemnând faptul că o problemă mai mare poate fi "spartă" în mai multe subprobleme care sunt mai ușor de rezolvat și care se repetă pe parcursul execuției algoritmului. 
+Soluțiile acestor subprobleme sunt stocate astfel încât să nu fie necesară recalcularea lor, lucru care îmbunătățește timpul de rezolvare al  algoritmului. \par 
+Principalele abordări prin care soluțiile sunt stocate când folosim programarea dinamică sunt:
+\begin{itemize}
+     \item \textbf{Memoizarea (Top-Down)} este abordarea recursivă, în care rezultatele sunt salvate într-un tabel de unde vor fi accesate ulterior când este nevoie de rezultatul deja calculat;
+     \item \textbf{Tabelizarea (Bottom-Up)} este abordarea în care se pornește de la calcularea celor mai mici subprobleme, construind treptat soluția finală din soluțiile subproblemelor mai mici.
+\end{itemize}
+În general, paradigma programării dinamice este folosită pentru a rezolva problemele de optimizare care au ca obiectiv obținerea celei mai bune soluții într-un cadru de optimizare, fie pentru minimizare, fie pentru maximizare.\par
+
+
+\subsection*{Problema Rucsacului}
+Problema rucsacului este o problemă de optimizare. Presupunând că avem un rucsac care poate susține o anumită greutate maximă numită capacitate, trebuie sa alegem dintr-o mulțime mai largă de obiecte un număr limitat de obiecte astfel încât valoarea totală a acestora este maximă, iar capacitatea totală a obiectelor nu depășește capacitatea rucsacului. Cele mai cunoscute variațiuni ale acestei probleme sunt varianta continuă și varianta discretă. \par 
+În varianta continuă, obiectele pot fi fracționate în mai multe bucăți, permițând alegerea parțială a unui obiect. \par
+În varianta discretă fiecare obiect poate fi ales o singură dată sau deloc. Pentru varianta discretă, abordările greedy nu produc mereu o soluție optimă.
+
+\subsection*{Formularea problemei}
+Pentru a înțelege mai bine ideea problemei vom considera următorul exemplu:
+\begin{textbox}
+Date de intrare: 
+
+\end{textbox}
