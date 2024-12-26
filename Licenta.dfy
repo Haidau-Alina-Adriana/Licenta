@@ -1003,7 +1003,7 @@ method solvesAdd0TooBig(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<s
     assert isOptimalPartialSolution(p, currentSolution, i, j);        
 }
 
-method main()
+method Main()
 {
     var p: Problem := Problem(n := 4, c := 8, 
                                     gains := [1, 2, 5, 6], weights := [2, 3, 4, 5]);
