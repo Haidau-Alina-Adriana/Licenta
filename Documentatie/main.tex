@@ -12,6 +12,11 @@
 \usepackage[most]{tcolorbox}    % used for text boxes
 \usepackage{enumitem}
 \usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs}
 
 
 % includes options
@@ -26,6 +31,47 @@
 enhanced,
 colback=white
 }
+
+\tcbset{
+    mystyle/.style={
+        colback=blue!5!white,
+        colframe=white,
+        boxrule=0mm,
+        left=0mm,
+        right=0.3em,
+        coltitle=black,
+        width=\textwidth,
+        halign=justify,
+        breakable
+    }
+}
+
+\newcommand{\resulttable}[2]{ %
+    \begin{table}[h]
+        \caption*{$i = #1$}
+        \centering
+        \begin{tblr}{
+            colspec={llllllllll},
+            row{odd}={bg=colfour},
+            row{1}={font=\bfseries\itshape, bg=colsix},
+            column{1}={font=\bfseries\itshape, bg=colsix},
+        }
+        i$\backslash$j & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+        \toprule
+        #2
+        \bottomrule
+        \end{tblr}
+    \end{table}
+}
+
+\definecolor{colone}{RGB}{209,220,204}
+\definecolor{coltwo}{RGB}{204,222,210}
+\definecolor{colthree}{RGB}{207,233,232}
+\definecolor{colfour}{RGB}{248,243,214}
+\definecolor{colfive}{RGB}{245,238,197}
+\definecolor{colsix}{RGB}{243,235,179}
+\definecolor{colseven}{RGB}{241,231,163}
+
 \graphicspath{{images/}}        % path where the images are located
 \setlength{\parindent}{1cm}     % paragraph indentation
 

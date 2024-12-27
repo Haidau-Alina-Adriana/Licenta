@@ -1,20 +1,7 @@
-\tcbset{
-    mystyle/.style={
-        colback=blue!5!white,
-        colframe=white,
-        boxrule=0mm,
-        left=0mm,
-        right=0.3em,
-        coltitle=black,
-        width=\textwidth,
-        halign=justify,
-        breakable
-    }
-}
-
 \chapter*{Introducere} 
 \addcontentsline{toc}{chapter}{Introducere}
 
+\begin{sloppypar}
 În acest capitol introductiv voi face o scurtă prezentare a limbajului Dafny, urmată apoi de niște informații despre paradigma programării dinamice și câteva detalii despre Problema Rucsacului.
 
 \subsection*{Limbajul de programare Dafny}
@@ -83,15 +70,68 @@ iar fiecare celulă din matricea \textit{profits} stochează rezultatul optim pe
 $\bullet$ Dacă obiectul curent este inclus în soluție, atunci rezultatul va fi calculat din profitul obiectului la care se adaugă soluția subproblemei pentru greutatea rămasă \(j - weights[i - 1]\), soluție care știm că este optimă pentru \(i\) obiecte si capacitate \(j - weights[i - 1]\); \par
 $\bullet$ Altfel dacă obiectul nu este inclus, soluția va rămâne aceeași ca cea pentru \(i - 1\) obiecte și capacitate \(j\), soluție care știm că este optimă pentru \(i - 1\) obiecte si capacitate \(j\). \par
 Aici intervine cea de-a doua proprietate specifică programării dinamice, mai exact faptul că soluția globală este mereu compusă din soluțiile optime ale subproblemelor, numită proprietatea de \textbf{substructură optimă}.
+\\ \par
+Aplicând algoritmul pentru a obține profitul maxim pentru datele de intrare de mai sus, voi explica următoarele notații:
+\begin{itemize}
+    \item $i$ este folosit pentru a memora indexul obiectului
+    \item $j$ este folosit pentru a memora indexul capacității parțiale a rucsacului
+    \item tuplul $(i = x, j = y)$, unde $0 \le x < n$ și $0 \le j < c$ reprezintă o subproblemă în care considerăm $i$ obiecte și o capacitate parțială $j$ a rucsacului.
+\end{itemize}
 \par
-Executând algoritmul prezentat pe datele de intrare folosite ca exemplu, vom obține următoarele rezultate:
+\textbf{Cazul de bază} îl reprezintă $i = 0$ în care nu avem niciun obiect la dispoziție, iar pentru fiecare subproblemă $(i = 0, j = a)$, unde $0 \le a < c$, soluția optimă este cea de profit maxim 0:
 
+\resulttable{0}{
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    }
 
-% \begin{table}[]
-%     \begin{tabular}{@{}llllllllll@{}}
-%     \toprule
-%     & \multicolumn{8}{c}{j} \\ \cmidrule{2-10}
-%     i & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \midrule
-%     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \bottomrule
-%     \end{tabular}
-% \end{table}
+Algoritmul continuă prin parcurgerea fiecărui obiect și fiecare valoare posibilă a greutății rucsacului. Pentru cazul în care $i = 1$, profitul maxim care se poate obține este 1 deoarece avem un singur obiect la dispoziție: 
+
+\resulttable{1}{
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+    }
+
+Pentru $i = 2$ considerăm doar primele două obiecte. \par
+\begin{itemize}
+\item Pentru subproblema $(i = 2, j = 2)$ putem adăuga doar primul obiect în rucsac, iar profitul este 1; 
+\item Pentru subproblema $(i = 2, j = 3)$ putem adăuga al doilea obiect deoarece aduce un profit mai bun decât cel anterior $profits[i - 1][j]$ care este 1, iar restricția de a nu depăși capacitatea ruscacului este respectată; 
+\item Pentru subproblema $(i = 2, j = 5)$ putem adăuga ambele obiecte în rucsac : 
+\end{itemize}
+
+\resulttable{2}{
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+    2 & 0 & 0 & 1 & 2 & 2 & 3 & 3 & 3 & 3 \\
+}
+
+Aplicând aceeași logică și pentru $i = 3$ vom obține următoarele rezultate: \par
+$\bullet$ Pentru subproblema $(i = 3, j = 2)$ putem adăuga doar primul obiect; \par
+$\bullet$ Pentru subproblema $(i = 3, j = 3)$ putem adăuga doar al doilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 3, j = 5)$ putem adăuga al treilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 3, j = 6)$ putem adăuga primul și al treilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 3, j = 7)$ putem adăuga al doilea și al treilea obiect: \par
+
+\resulttable{3}{
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+    2 & 0 & 0 & 1 & 2 & 2 & 3 & 3 & 3 & 3 \\
+    3 & 0 & 0 & 1 & 2 & 5 & 5 & 6 & 7 & 7 \\
+}
+
+Asemănător și pentru $i = 4$ când avem toate obiectele la dispoziție: \par
+$\bullet$ Pentru subproblema $(i = 4, j = 2)$ putem adăuga primul obiect; \par
+$\bullet$ Pentru subproblema $(i = 4, j = 3)$ putem adăuga doar al doilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 4, j = 5)$ putem adăuga al treilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 4, j = 6)$ putem adăuga primul și al treilea obiect; \par
+$\bullet$ Pentru subproblema $(i = 4, j = 7)$ putem adăuga al doilea și al treilea obiect; \par
+$\bullet$ Ajungem la $(i = 4, j = 8)$ care este problema inițială și adaugăm al doilea și ultimul obiect, iar profitul maxim care se poate obține pornind de la datele de intrare este 8: \par
+
+\resulttable{4}{
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 \\
+    2 & 0 & 0 & 1 & 2 & 2 & 3 & 3 & 3 & 3 \\
+    3 & 0 & 0 & 1 & 2 & 5 & 5 & 6 & 7 & 7 \\
+    4 & 0 & 0 & 1 & 2 & 5 & 6 & 6 & 7 & 8 \\
+}
+
+\end{sloppypar}
