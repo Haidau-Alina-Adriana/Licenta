@@ -1,10 +1,43 @@
-\chapter{Detalii de implementare ale problemei}
+\lstset{style=mylststyle}
 
+\chapter{Detalii de implementare ale problemei}
+\begin{sloppypar}
 În acest capitol voi detalia implementarea algoritmului, dar și modul în care Dafny evaluează corectitudinea și optimalitatea codului. 
 
 \section{Reprezentarea datelor de intrare/iesire}
 
-Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa folosesc un tip de date numit Problem definit astfel:
+Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date \textbf{\textit{\textcolor{coleight}{Problem}}} astfel:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{datatype} \PY{n+nc}{Problem} \PY{o}{=} \PY{n}{Problem}\PY{p}{(}\PY{n}{n}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{c}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{gains}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} 
+\PY{n}{weights}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{)} 
+\end{Verbatim}
+unde:
+\begin{itemize}
+    \item câmpul \textit{\textbf{\textcolor{coleight}{n}}} reprezintă numărul de obiecte disponibile;
+    \item câmpul \textit{\textbf{\textcolor{coleight}{c}}} reprezintă capacitatea totală a rucsacului;
+    \item câmpul \textit{\textbf{\textcolor{coleight}{gains}}} este o secvență ce memorează profitul fiecărui obiect;
+    \item câmpul \textit{\textbf{\textcolor{coleight}{weights}}} este o secvență ce memorează greutatea fiecărui obiect.
+\end{itemize} \par
+Folosind cuvântul cheie \textit{\textbf{\textcolor{coleight}{datatype}}} am definit un nou tip de date inductiv numit \textit{\textbf{\textcolor{coleight}{Problem}}} cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă și sunt tipuri de date primitive.
+\par
+Atât profitul, cât și greutatea fiecărui obiect pot fi accesate prin indexul corespunzător poziției din secvență. Spre exemplu, pentru a accesa greutatea celui de-al doilea obiect este folosit operatorul de indexare $weights[1]$, deoarece indexarea celor două secvențe începe de la 0. În dafny, o \textit{secvență} este o colecție de elemente de același tip, iar în cazul acesta, de numere întregi. \\ \par
+
+Datele de ieșire am ales să le reprezint astfel:
+\begin{Verbatim}[commandchars=\\\{\}]
+                \PY{p}{(}\PY{n}{profit}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
+\end{Verbatim}
+unde:
+\begin{itemize}
+    \item \textit{\textbf{\textcolor{coleight}{profit}}} reprezintă profitul maxim care se poate obține pentru o anumită instanță a problemei;
+    \item \textit{\textbf{\textcolor{coleight}{solution}}} reprezintă un sinonim al tipului de date \texttt{seq\(<\)int\(>\)} folosit pentru a îmbunătăți claritatea codului și este declarat astfel:
+\begin{Verbatim}[commandchars=\\\{\}]
+                \PY{n}{type} \PY{n}{Solution} \PY{o}{=} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}
+\end{Verbatim}
+și este o reprezentare a deciziei de includere sau nu a obiectului în rucsac. Prin urmare, valoarea de 1 reprezintă faptul că obiectul aparține soluției, deci este adăugat în rucsac, iar profitul adus de acesta îmbunătățește câștigul obținut, iar 0 reprezintă faptul că obiectul nu este adăugat în rucsac, deci profitul obiectului nu este inclus în câștigul maxim obținut.
+\end{itemize} 
+
+\end{sloppypar}
 
 \section{Reprezentarea solutiilor optime si partial optime}
 
