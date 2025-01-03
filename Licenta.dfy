@@ -51,9 +51,9 @@ function sumAllGains(p: Problem, i: int) : int
   if (i == 1) then p.gains[0] else p.gains[i - 1] + sumAllGains(p, i -1)
 }
 
-predicate hasPositiveValues(solution: Solution)
+predicate hasPositiveValues(arr: seq<int>)
 {
-  forall i :: 0 <= i < |solution| ==> solution[i] > 0
+  forall i :: 0 <= i < |arr| ==> arr[i] > 0
 }
 
 predicate hasAllowedValues(solution: Solution)
@@ -148,12 +148,12 @@ lemma computeWeightFits1(p: Problem, solution: Solution, i: int, j: int)
   
   ensures computeWeight(p, solution + [1], |solution + [1]| - 1) <= j
 {
-  var s' := solution + [1];
-  assert solution == s'[..|s'| - 1];
+  var s := solution + [1];
+  assert solution == s[..|s| - 1];
 
-  for a := 0 to |s'[..|s'| - 1]|
-    invariant 0 <= a <= |s'[..|s'| - 1]| + 1
-    invariant forall k :: 0 <= k < a ==> computeWeight(p, solution, k) == computeWeight(p, s', k)
+  for a := 0 to |s[..|s| - 1]|
+    invariant 0 <= a <= |s[..|s| - 1]| + 1
+    invariant forall k :: 0 <= k < a ==> computeWeight(p, solution, k) == computeWeight(p, s, k)
   { }
 }
 
@@ -169,9 +169,9 @@ lemma computeWeightFits0(p: Problem, solution: Solution, j: int)
   if |solution| == 0 {
     assert weight(p, solution) <= j;
   } else {
-    var s' := solution + [0];
-    assert s'[..|s'| - 1] == solution;
-    computeWeightAdd0(p, s', |s'| - 2);
+    var s := solution + [0];
+    assert s[..|s| - 1] == solution;
+    computeWeightAdd0(p, s, |s| - 2);
     assert computeWeight(p, solution + [0], |solution + [0]| - 1) <= j;
   }
 }
@@ -617,7 +617,7 @@ lemma optimalSolRemove1(p: Problem, solution: Solution, i: int, j: int)
 
  ensures isOptimalPartialSolution(p, solution[..i - 1], i - 1, j - p.weights[i - 1])
 {
-  var s' := solution[..i - 1];
+  var s := solution[..i - 1];
   weightAdd1(p, solution);
   assert isPartialSolution(p, solution[..i - 1], i - 1, j - p.weights[i - 1]);
 
@@ -632,9 +632,9 @@ lemma optimalSolRemove1(p: Problem, solution: Solution, i: int, j: int)
     gainAdd1(p, x1);
     weightAdd1(p, x1);
     assert isOptimalPartialSolution(p, x1, i, j);
-    assert s' == solution[..|solution| - 1];
+    assert s == solution[..|solution| - 1];
     assert x == x1[..|x1| - 1];
-    assert gain(p, x1) == gain(p, x) + p.gains[i - 1] > gain(p, s') + p.gains[i- 1] == gain(p, solution);
+    assert gain(p, x1) == gain(p, x) + p.gains[i - 1] > gain(p, s) + p.gains[i- 1] == gain(p, solution);
     assert gain(p, x1) > gain(p, solution);
     assert false;
   }
@@ -651,7 +651,7 @@ lemma optimalSolRemove0(p: Problem, solution: Solution, i: int, j: int)
 
  ensures isOptimalPartialSolution(p, solution[..i - 1], i - 1, j)
 {
-  var s' := solution[..i - 1];
+  var s := solution[..i - 1];
   weightAdd0(p, solution);
   assert isPartialSolution(p, solution[..i - 1], i - 1, j);
 
@@ -665,9 +665,9 @@ lemma optimalSolRemove0(p: Problem, solution: Solution, i: int, j: int)
     gainAdd0(p, x1);
     weightAdd0(p, x1);
     assert isOptimalPartialSolution(p, x1, i, j);
-    assert s' == solution[..|solution| - 1];
+    assert s == solution[..|solution| - 1];
     assert x == x1[..|x1| - 1];
-    assert gain(p, x1) == gain(p, x) >= gain(p, s') == gain(p, solution);
+    assert gain(p, x1) == gain(p, x) >= gain(p, s) == gain(p, solution);
     assert gain(p, x1) == gain(p, solution);
     assert false;
   }
