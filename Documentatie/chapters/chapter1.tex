@@ -1,12 +1,13 @@
 \lstset{style=mylststyle}
+\begin{sloppypar}
+
 
 \chapter{Detalii de implementare ale problemei}
-\begin{sloppypar}
 În acest capitol voi detalia implementarea algoritmului, dar și modul în care Dafny evaluează corectitudinea și optimalitatea codului. 
 
 \section{Reprezentarea datelor de intrare/ieșire}
 
-Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date \textbf{\textit{\textcolor{coleight}{Problem}}} astfel:
+Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date \formatText{Problem} astfel:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{datatype} \PY{n+nc}{Problem} \PY{o}{=} \PY{n}{Problem}\PY{p}{(}\PY{n}{n}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{c}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{gains}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} 
@@ -19,7 +20,7 @@ unde:
     \item câmpul \textit{\textbf{\textcolor{coleight}{gains}}} este o secvență ce memorează profitul fiecărui obiect;
     \item câmpul \textit{\textbf{\textcolor{coleight}{weights}}} este o secvență ce memorează greutatea fiecărui obiect.
 \end{itemize} \par
-Folosind cuvântul cheie \textit{\textbf{\textcolor{coleight}{datatype}}} am definit un nou tip de date inductiv numit \textit{\textbf{\textcolor{coleight}{Problem}}} cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă și sunt tipuri de date primitive.
+Folosind cuvântul cheie \formatText{datatype} am definit un nou tip de date inductiv numit \formatText{Problem} cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă și sunt tipuri de date primitive.
 \par
 Atât profitul, cât și greutatea fiecărui obiect pot fi accesate prin indexul corespunzător poziției din secvență. Spre exemplu, pentru a accesa greutatea celui de-al doilea obiect este folosit operatorul de indexare $weights[1]$, deoarece indexarea celor două secvențe începe de la 0. În dafny, o \textit{secvență} este o colecție de elemente de același tip, iar în cazul acesta, de numere întregi. \\ \par
 
@@ -29,35 +30,29 @@ Datele de ieșire sunt reprezentate astfel:
 \end{Verbatim}
 unde:
 \begin{itemize}
-    \item \textit{\textbf{\textcolor{coleight}{profit}}} reprezintă profitul maxim care se poate obține pentru o anumită instanță a problemei;
-    \item \textit{\textbf{\textcolor{coleight}{solution}}} reprezintă un sinonim al tipului de date \texttt{seq\(<\)int\(>\)} folosit pentru a îmbunătăți claritatea codului, este declarat anterior astfel:
+    \item \formatText{profit} reprezintă profitul maxim care se poate obține pentru o anumită instanță a problemei;
+    \item \formatText{solution} reprezintă un sinonim al tipului de date \texttt{seq\(<\)int\(>\)} folosit pentru a îmbunătăți claritatea codului, este declarat anterior astfel:
 \begin{Verbatim}[commandchars=\\\{\}]
                 \PY{n}{type} \PY{n}{Solution} \PY{o}{=} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}
 \end{Verbatim}
 și este o reprezentare binară a deciziei de includere a obiectului în rucsac. Prin urmare, valoarea de 1 reprezintă faptul că obiectul aparține soluției, deci este adăugat în rucsac, iar profitul adus de acesta îmbunătățește câștigul final, iar 0 reprezintă faptul că obiectul nu este adăugat în rucsac, deci profitul obiectului nu este inclus în câștigul maxim obținut. Această secvență reprezintă soluția finală și trebuie să fie optimă.
 \end{itemize} 
 
-\end{sloppypar}
-
 \section{Soluția optimă și soluțiile parțial optime}
 
-\begin{sloppypar}
-
 În cadrul problemei rucsacului putem discuta despre ce reprezintă soluția optimă, cât și soluțiile parțial optime. \par
-Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o matrice numită $profits$ de tip \(seq<seq<int>>\), iar rezultatele pot fi accesate folosind operatorul de indexare pentru un tablou bidimensional: $profits[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm.
+Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o matrice numită \texttt{profits} de tip \texttt{seq<seq<int>>}, iar rezultatele pot fi accesate folosind operatorul de indexare pentru un tablou bidimensional: $profits[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm.
 \par
-Pe lângă matricea $profits$, această lucrare se bazează pe o matrice suplimentară numită $solutions$ de tip \(seq<seq<seq<int>>>\) care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea $profits$. Rezultatele sunt accesate similar matricei $profits$.
+Pe lângă matricea \texttt{profits}, această lucrare se bazează pe o matrice suplimentară numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>} care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Rezultatele sunt accesate similar matricei profits.
 \par
-\textbf{O soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului pentru problema completă. Acest rezultat trebuie să fie cel mai bun pe care îl putem obține pentru instanța problemei pe care o primim la intrare, iar această soluție este găsită în ultima celulă a matricei, $solutions[n][c]$.
+O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului pentru problema completă. Acest rezultat trebuie să fie cel mai bun pe care îl putem obține pentru instanța problemei pe care o primim la intrare, iar această soluție este găsită în ultima celulă a matricei, $solutions[n][c]$.
 \par
-\textbf{O soluție parțială} este o secvență binară de o lungime variabilă (care nu depășește numărul de obiecte) corespunzătoare deciziei de a include un obiect care respectă constrângerea legată de capacitatea rucsacului. \par
-\textbf{O soluție parțial optimă} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ și aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8.
-
-\end{sloppypar}
+O \formatText{soluție parțială} este o secvență binară de o lungime variabilă (care nu depășește numărul de obiecte) corespunzătoare deciziei de a include un obiect care respectă constrângerea legată de capacitatea rucsacului. \par
+O \formatText{soluție parțial optimă} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ și aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8.
 
 \section{Precondiții, postcondiții și invarianți}
 
-Precondițiile, postcondițiile și invarianții mai sunt numite și specificații și reprezintă proprietăți logice folosite pentru a descrie comportamentul pe care ar trebui să îl îndeplinească programul la un anumit punct. Ele garantează că aceste proprietăți sunt respectate pe tot parcursul execuției și sunt folosite pentru metode, funcții, bucle, leme și iteratori. \par
+\formatText{Precondițiile}, \formatText{postcondițiile} și \formatText{invarianții} mai sunt numite și specificații și reprezintă proprietăți logice folosite pentru a descrie comportamentul pe care ar trebui să îl îndeplinească programul la un anumit punct. Ele garantează că aceste proprietăți sunt respectate pe tot parcursul execuției și sunt folosite pentru metode, funcții, bucle, leme și iteratori. \par
 Specificațiile sunt esențiale pentru ajutarea verificatorului, permițând astfel validarea corectitudinii logice a programului. Vom considera mai departe această bucată de cod ce aparține unei leme folosite pentru demonstrarea faptului că o soluție este parțială prin adăugarea unui obiect:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{computeWeightFits1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
@@ -83,18 +78,18 @@ Specificațiile sunt esențiale pentru ajutarea verificatorului, permițând ast
 \end{Verbatim}
 Astfel avem:
 \begin{itemize}
-    \item \textit{\textbf{\textcolor{coleight}{Precondițiile}}} sunt expresii logice care trebuie să fie adevărate înainte de executarea logicii unei functii sau metode și necesită clauza \texttt{requires}:
+    \item \formatText{Precondițiile} sunt expresii logice care trebuie să fie adevărate înainte de executarea logicii unei functii sau metode și necesită clauza \texttt{requires}:
     \begin{Verbatim}[commandchars=\\\{\}]
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
 \end{Verbatim}
 Această precondiție, spre exemplu, ne asigură că vom lucra în cadrul lemei cu o problemă validă.
-\item \textit{\textbf{\textcolor{coleight}{Postcondițiile}}} sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții sau metode și necesită clauza \texttt{ensures}:
+\item \formatText{Postcondițiile} sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții sau metode și necesită clauza \texttt{ensures}:
     \begin{Verbatim}[commandchars=\\\{\}]
   \PY{k}{ensures} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{o}{|}
     \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
 \end{Verbatim}
     Singura postcondiție ne asigură faptul că la ieșirea din lemă putem garanta că pentru parametrii de intrare care respectă precondițiile, expresia logică din postcondiție este adevarată.
-    \item \textit{\textbf{\textcolor{coleight}{Invarianții}}} sunt expresii logice care de obieci sunt folosiți pentru specificațiile unei bucle și trebuie să fie adevărate pe toată durata ciclului, inclusiv înainte de intrarea în buclă, cât și după ieșirea din aceasta. Pentru invarianți se folosește clauza \texttt{invariant}:
+    \item \formatText{Invarianții} sunt expresii logice care de obieci sunt folosiți pentru specificațiile unei bucle și trebuie să fie adevărate pe toată durata ciclului, inclusiv înainte de intrarea în buclă, cât și după ieșirea din aceasta. Pentru invarianți se folosește clauza \texttt{invariant}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{a} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{s}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{s}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|} \PY{o}{+} \PY{l+m+mi}{1}
 \end{Verbatim}
@@ -108,7 +103,7 @@ Această precondiție, spre exemplu, ne asigură că vom lucra în cadrul lemei 
 Predicatele în Dafny sunt funcții ale călor rezultate sunt valori boolene. Acestea sunt folosite pentru a evalua proprietăți care de obicei trebuie să fie adevărate și de aceea ele ajută în procesul de verificare al corectitudinii. Predicatele pe care urmează să le prezint au fost foarte des folosite ca și condiții pe care metodele și lemele trebuie să le respecte, dar și ca rezultate la ieșirea din acestea pentru asigurarea unor proprietăți necesare, de exemplu, în verificarea optimalității. \par
 Astfel, voi continua cu prezentarea acestor predicate:
 \begin{enumerate}
-    \item Predicatul \textit{hasPositiveValues} este definit astfel:
+    \item Predicatul \formatText{hasPositiveValues} este definit astfel:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{hasPositiveValues}\PY{p}{(}\PY{n}{arr}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -116,7 +111,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     și este folosit, după cum sugerează și numele acestuia, pentru a verifica dacă toate elementele unui vector precum $gains$ sunt pozitive.
-    \item Predicatul \textit{hasAllowedValues}
+    \item Predicatul \formatText{hasAllowedValues}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -125,7 +120,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     se asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 \(-\) obiectul nu este în rucsac, 1 \(-\) obiectul este în rucsac.
-    \item Predicatul \textit{isValidProblem}, definit astfel:
+    \item Predicatul \formatText{isValidProblem}, definit astfel:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -135,7 +130,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     este un predicat foarte important, folosit ca precondiție aproape pentru fiecare funcție și metodă din cod. Acest predicat este folosit ca validator pentru instanța problemei a cărei soluție optimă încercăm să găsim. Ne așteptăm astfel să avem cel puțin un obiect la dispoziție și un rucsac de capacitate mai mare decât zero, să știm greutatea și câștigul fiecărui obiect, iar acestea să fie la rândul lor valori pozitive diferite de zero.
-    \item Predicatul \textit{isValidPartialSolution}
+    \item Predicatul \formatText{isValidPartialSolution}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -144,7 +139,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     este folosit pentru a verifica dacă soluția parțială este validă, mai exact dacă are doar elemente de 0 și 1, iar lungimea acesteia este cel mult egală cu numărul de obiecte ale instanței.
-    \item Predicatul \textit{isPartialSolution}
+    \item Predicatul \formatText{isPartialSolution}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
         \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -156,8 +151,8 @@ Astfel, voi continua cu prezentarea acestor predicate:
   \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    vine în completarea predicatului \textit{isValidPartialSolution} și pe lângă proprietățile aduse de acesta, verifică dacă soluția este validă pentru subproblema $(i, j)$.
-    \item Predicatul \textit{isSolution}
+    vine în completarea predicatului \formatText{isValidPartialSolution} și pe lângă proprietățile aduse de acesta, verifică dacă soluția este validă pentru subproblema $(i, j)$.
+    \item Predicatul \formatText{isSolution}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -166,8 +161,8 @@ Astfel, voi continua cu prezentarea acestor predicate:
   \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
 \PY{p}{\PYZcb{}}
 \end{Verbatim} 
-    verifică dacă avem o soluție pentru problema completă.
-    \item Predicatul \textit{isOptimalPartialSolution}
+    verifică dacă avem o soluție validă pentru problema completă.
+    \item Predicatul \formatText{isOptimalPartialSolution}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
     \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -181,7 +176,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     este folosit pentru verificarea optimalității unei subprobleme $(i, j)$, adică avem cel mai bun câștig care se poate obține pentru orice soluție validă cu elemente de 0 și 1 ale unei subprobleme cu $i$ obiecte și o capacitate $j$ a rucsacului.
-    \item Predicatul \textit{isOptimalSolution}
+    \item Predicatul \formatText{isOptimalSolution}
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
     \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
@@ -194,7 +189,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     verifică optimalitatea soluției finale.
-    \item Predicatul \textit{isValidSubproblem}
+    \item Predicatul \formatText{isValidSubproblem}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidSubproblem}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -202,7 +197,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     este folosit pentru a defini o subproblemă a problemei inițiale.
-    \item Predicatul \textit{areValidPartialSolutions}
+    \item Predicatul \formatText{areValidPartialSolutions}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{areValidPartialSolutions}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} 
     \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{solutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} 
@@ -218,7 +213,7 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     este folosit pentru a valida rezultatele obținute doar pentru subproblemele pasului curent, în funcție de modificările aduse datorate creșterii numărului de obiecte disponibile.
-    \item Predicatul \textit{areValidSolutions}
+    \item Predicatul \formatText{areValidSolutions}
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{areValidSolutions}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} 
     \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{solutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -238,12 +233,506 @@ Astfel, voi continua cu prezentarea acestor predicate:
 \end{enumerate}
 
 \subsection{Funcții}
+În Dafny, funcțiile pot fi interpretate ca funcții matematice în care corpul funcției reprezintă definiția acesteia, motiv pentru care de obicei, funcțiile nu necesită postcondiții. Sunt folosite pentru a returna un rezultat la ieșire al cărui tip este specificat în semnătura funcției, imediat după lista de parametri. \par 
+Funcțiile importante pe care le-am folosit sunt:
+\begin{enumerate}
+    \item Funcția \formatText{gain}
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{function} \PY{n+nf}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}\PY{p}{:} \PY{k+kt}{int}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+\PY{p}{\PYZob{}}
+  \PY{k}{if} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==} \PY{l+m+mi}{0} \PY{k}{then} \PY{l+m+mi}{0} 
+        \PY{k}{else} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    este folosită pentru calcularea profitului corespunzător unei soluții valide. Este folosită când se dorește câștigul întregii soluții.
+    \item Funcția \formatText{computeGain}
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{function} \PY{n+nf}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} 
+    \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} \PY{p}{:} \PY{k+kt}{int}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{o}{|}
+  \PY{k}{requires} \PY{n}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{o}{|}
+  \PY{k}{ensures} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}
+\PY{p}{\PYZob{}}
+  \PY{k}{if} \PY{n}{i} \PY{o}{==} \PY{l+m+mi}{0} \PY{k}{then} \PY{n}{solution}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{*} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{k}{else} 
+  \PY{n}{solution}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{*} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{+} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    spre deosebire de $gain$, poate primi o subsoluție al cărui profit se dorește a fi calculat prin specificarea unui index $i$ reprezentând poziția de la final spre început a subsoluției. Este o funcție recursivă a cărei finalitate este asigurată prin condiția $i == 0$.
+    \item Funcția \formatText{weight}, asemănătoare din punct de vedere al implementării cu \formatText{gain}, calculează greutatea pe care o ocupă obiectele corespunzătoare pozițiilor din soluție ale cărei valoare este 1.
+    \item Funcția \formatText{computeWeight}, asemănătoare din punct de vedere al implementării cu \formatText{computeGain}, în schimb ea calculează greutatea unei (sub)soluții.
+    \item Funcția \formatText{sumAllGains}
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{function} \PY{n+nf}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} \PY{p}{:} \PY{k+kt}{int}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{ensures} \PY{n}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{l+m+mi}{0}
+\PY{p}{\PYZob{}}
+  \PY{k}{if} \PY{p}{(}\PY{n}{i} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)} \PY{k}{then} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} 
+    \PY{k}{else} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim} 
+    este o funcție al cărui rezultat reprezintă suma tuturor profiturilor obiectelor.
+\end{enumerate}
 
+\section{Punctul de intrare și arhitectura codului}
+
+Execuția algoritmului propus pornește de la o metodă principală numită \formatText{solve} ce primește ca parametru o problemă \textit{p: Problem}. Pentru acestă problemă algoritmul va trebui să întoarcă două rezultate, unul este profitul maxim care se poate obține pentru instanța problemei oferită \textit{profit: int}, iar cel de-al doilea rezultat este soluția \textit{solution: Solution} corespunzătoare profitului obținut.
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{method} \PY{n+nf}{solve}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{)} \PY{k}{returns} \PY{p}{(}\PY{n}{profit}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{ensures} \PY{n}{isSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}
+  \PY{k}{ensures} \PY{n}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}
+\PY{p}{\PYZob{}}
+    \PY{k+kd}{var} \PY{n}{profits} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;} 
+    \PY{k+kd}{var} \PY{n}{solutions} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{i} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{partialProfits}\PY{p}{,} \PY{n}{partialSolutions} \PY{o}{:=} 
+        \PY{n}{solves0Objects}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profits}\PY{p}{,} \PY{n}{solutions}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+    \PY{n}{profits} \PY{o}{:=} \PY{n}{profits} \PY{o}{+} \PY{p}{[}\PY{n}{partialProfits}\PY{p}{]}\PY{p}{;}
+    \PY{n}{solutions} \PY{o}{:=} \PY{n}{solutions} \PY{o}{+} \PY{p}{[}\PY{n}{partialSolutions}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+        \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+        \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+            \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{;}
+    \PY{n}{i} \PY{o}{:=} \PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;}
+    \PY{k}{while} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} 
+      \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1}
+      \PY{k}{invariant} \PY{o}{|}\PY{n}{profits}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==} \PY{n}{i}
+      \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{o}{|}\PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+      \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+        \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+      \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+        \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+            \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{,} \PY{n}{k}\PY{p}{,} \PY{n}{q}\PY{p}{)}
+      \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+        \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+            \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}
+    \PY{p}{\PYZob{}}
+        \PY{n}{partialProfits}\PY{p}{,} \PY{n}{partialSolutions} \PY{o}{:=} 
+            \PY{n}{getPartialProfits}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profits}\PY{p}{,} \PY{n}{solutions}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+        \PY{n}{profits} \PY{o}{:=} \PY{n}{profits} \PY{o}{+} \PY{p}{[}\PY{n}{partialProfits}\PY{p}{]}\PY{p}{;}
+        \PY{n}{solutions} \PY{o}{:=} \PY{n}{solutions} \PY{o}{+} \PY{p}{[}\PY{n}{partialSolutions}\PY{p}{]}\PY{p}{;}
+        \PY{n}{i} \PY{o}{:=} \PY{n}{i} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;} 
+    \PY{p}{\PYZcb{}}
+    \PY{n}{solution} \PY{o}{:=} \PY{n}{solutions}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{]}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{n}{profit} \PY{o}{:=} \PY{n}{profits}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{]}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{]}\PY{p}{;}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    \par La finalul execuției metodei, postcondițiile \formatText{isSolution} și \formatText{isOptimalSolution} ne asigură că obținem o soluție validă doar cu elemente de 0 și 1, de lungime egală cu numărul de obiecte, ce nu depășește capacitatea rucsacului și de profit maxim.
+    \par La început, vom inițializa secvențele $profits$ și $solutions$ cu secvențe vide, iar numărul de obiecte disponibile este contorizat prin $i$ și pornește de la 0. Vom obține rezultatele pentru cazurile de bază pentru subproblemele în care $i = 0$, adică mulțimea obiectelor este vidă pentru fiecare capacitate parțială a rucsacului invocând o altă metodă, 
+    numită \formatText{solves0Objects}.
+    \par La fiecare iterație aceeași logică este aplicată pentru fiecare subproblemă în care i este fix, iar capacitatea rucsacului variază și vom obține soluțiile parțial optime și profiturile corespunzătoare acestora care sunt calculate și apoi returnate de metoda \formatText{getPartialProfits}, urmând a fi salvate în secvențele anterior menționate, respectiv $solutions$ și $profits$. La final, rezultatele finale se pot obține din ultima celulă a secvențelor. \\ \par
+
+    Metoda \formatText{solves0Objects} se ocupă de obținerea rezultatelor cazurilor de bază.
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{var} \PY{n}{j} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
+\PY{k}{while} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+  \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+  \PY{k}{invariant} \PY{o}{|}\PY{n}{partialProfits}\PY{o}{|} \PY{o}{==} \PY{n}{j}
+  \PY{k}{invariant} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==} \PY{n}{j}
+  \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+  \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
+  \PY{p}{\PYZob{}}
+    \PY{n}{partialProfits} \PY{o}{:=} \PY{n}{partialProfits} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{currentSolution} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;}
+    \PY{n}{emptySolOptimal}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{n}{partialSolutions} \PY{o}{:=} \PY{n}{partialSolutions} \PY{o}{+} \PY{p}{[}\PY{n}{currentSolution}\PY{p}{]}\PY{p}{;}
+    \PY{n}{j} \PY{o}{:=} \PY{n}{j} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\end{Verbatim}
+    \par Știm că $i$ este $0$ în acest caz, mai exact nu avem niciun obiect la dispoziție, prin urmare cel mai bun profit care se poate obține este 0, iar soluțiile trebuie să nu conțină niciun element, deoarece nu avem ce să adăugăm în rucsac. Am folosit o buclă $while$ pentru a considera toate valorile posibile pe care le poate avea capacitatea rucsacului, iar la fiecare iterație soluțiile, respectiv profiturile aferente sunt memorate în $partialSolutions$, respectiv $partialProfits$. Invarianții sunt cei care asigură respectarea proprietăților dorite, cum ar fi valorile posibile pentru mulțimea valorilor capacităților rucsacului, numărul de soluții, respectiv numărul de profituri. Invariantul
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+\end{Verbatim}
+    este folosit pentru a verifica faptul că pe parcursul buclei toate soluțiile își păstrează proprietatea de \textbf{soluție parțial optimă}, iar invariantul 
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
+\end{Verbatim}
+    este folosit pentru a ajuta verificatorul să înțeleagă relația dintre cele două secvențe cu rezultate, mai exact aplicând funcția $gain$ peste o soluție stocată în secvența $partialSolutions$, rezultatul acesta poate fi interpretat ca fiind cel stocat în aceeași poziție în secvența $partialProfits$.
+    \par Proprietățile verificate de invarianți sunt propagate mai departe către postcondiții, această metodă garantând astfel că soluțiile aferente cazurilor de bază sunt optime și respectă limitările impuse față de lungimea rezultatelor stocate.  \\ \par
+
+    Metoda \formatText{getPartialProfits} se ocupă de obținerea rezultatelor pentru problemelprocesul iterativ, în care se consideră adăugarea obiectului $i$ dacă acesta produce un profit mai bun decât cel anterior pentru aceeași capacitate $j$, sau păstrarea soluției anterioare în caz contrar.
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{method} \PY{n+nf}{getPartialProfits}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} 
+ \PY{n}{solutions} \PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
+  \PY{k}{returns} \PY{p}{(}\PY{n}{partialProfits}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1}
+  \PY{k}{requires} \PY{n}{i} \PY{o}{==} \PY{o}{|}\PY{n}{profits}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solutions}\PY{o}{|}
+  \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{o}{|}\PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+  \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+  \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+   \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{,} \PY{n}{k}\PY{p}{,} \PY{n}{q}\PY{p}{)} 
+  \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+     \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}
+  \PY{k}{ensures} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1} \PY{o}{==} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{partialProfits}\PY{o}{|}
+  \PY{k}{ensures} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{profits}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1} 
+  \PY{k}{ensures} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+  \PY{k}{ensures} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
+\PY{p}{\PYZob{}}
+  \PY{k+kd}{var} \PY{n}{j} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{n}{partialProfits} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;}
+  \PY{n}{partialSolutions} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;}
+  \PY{k}{while} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+   \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
+   \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{profits}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1}
+   \PY{k}{invariant} \PY{n}{j} \PY{o}{==} \PY{o}{|}\PY{n}{partialProfits}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|}
+   \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+   \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
+    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
+   \PY{p}{\PYZob{}}
+     \PY{k}{if} \PY{n}{j} \PY{o}{==} \PY{l+m+mi}{0} \PY{p}{\PYZob{}}
+      \PY{k+kd}{var} \PY{n}{currentProfit}\PY{p}{,} \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solvesCapacity0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+      \PY{n}{partialProfits} \PY{o}{:=} \PY{n}{partialProfits} \PY{o}{+} \PY{p}{[}\PY{n}{currentProfit}\PY{p}{]}\PY{p}{;}
+      \PY{n}{partialSolutions} \PY{o}{:=} \PY{n}{partialSolutions} \PY{o}{+} \PY{p}{[}\PY{n}{currentSolution}\PY{p}{]}\PY{p}{;}
+      \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+     \PY{p}{\PYZcb{}} \PY{k}{else} \PY{p}{\PYZob{}} \PY{k}{if} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{p}{\PYZob{}}
+        \PY{k}{if} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]} \PY{o}{\PYZgt{}} 
+                        \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{p}{\PYZob{}}
+          \PY{k+kd}{var} \PY{n}{currentProfit}\PY{p}{,} \PY{n}{currentSolution} \PY{o}{:=} 
+            \PY{n}{solvesAdd1BetterProfit}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profits}\PY{p}{,} \PY{n}{solutions}\PY{p}{,} 
+            \PY{n}{partialProfits}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+          \PY{n}{partialProfits} \PY{o}{:=} \PY{n}{partialProfits} \PY{o}{+} \PY{p}{[}\PY{n}{currentProfit}\PY{p}{]}\PY{p}{;}
+          \PY{n}{partialSolutions} \PY{o}{:=} \PY{n}{partialSolutions} \PY{o}{+} \PY{p}{[}\PY{n}{currentSolution}\PY{p}{]}\PY{p}{;}
+          \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+        \PY{p}{\PYZcb{}} \PY{k}{else} \PY{p}{\PYZob{}}
+          \PY{k+kd}{var} \PY{n}{currentProfit}\PY{p}{,} \PY{n}{currentSolution} \PY{o}{:=} 
+            \PY{n}{solvesAdd0BetterProfit}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profits}\PY{p}{,} \PY{n}{solutions}\PY{p}{,} 
+            \PY{n}{partialProfits}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+          \PY{n}{partialProfits} \PY{o}{:=} \PY{n}{partialProfits} \PY{o}{+} \PY{p}{[}\PY{n}{currentProfit}\PY{p}{]}\PY{p}{;}
+          \PY{n}{partialSolutions} \PY{o}{:=} \PY{n}{partialSolutions} \PY{o}{+} \PY{p}{[}\PY{n}{currentSolution}\PY{p}{]}\PY{p}{;}
+          \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+        \PY{p}{\PYZcb{}}
+      \PY{p}{\PYZcb{}} \PY{k}{else} \PY{p}{\PYZob{}}
+          \PY{k+kd}{var} \PY{n}{currentProfit}\PY{p}{,} \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solvesAdd0TooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
+          \PY{n}{profits}\PY{p}{,} \PY{n}{solutions}\PY{p}{,} \PY{n}{partialProfits}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+          \PY{n}{partialProfits} \PY{o}{:=} \PY{n}{partialProfits} \PY{o}{+} \PY{p}{[}\PY{n}{currentProfit}\PY{p}{]}\PY{p}{;}
+          \PY{n}{partialSolutions} \PY{o}{:=} \PY{n}{partialSolutions} \PY{o}{+} \PY{p}{[}\PY{n}{currentSolution}\PY{p}{]}\PY{p}{;}
+          \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSolution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+       \PY{p}{\PYZcb{}}
+     \PY{p}{\PYZcb{}}
+    \PY{n}{j} \PY{o}{:=} \PY{n}{j} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;}
+    \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim} 
+    \par Metoda primește ca parametri secvențele $profits$ și $solutions$ ce memorează rezultatele calculate în iterațiile anterioare pentru a evita recalcularea și returnează alte secvențe în care sunt memorate rezultatele iterației curente după ce ne asigurăm că ele sunt corecte și optime pentru subproblemele pe care le rezolvă. \par
+    Invarianții folosiți aici sunt necesari pentru verificarea cu succes a metodei și de asemenea corespund cu postcondițiile, deoarece metoda apelantă \formatText{solve} trebuie să știe ce fel de rezultate primește înapoi. După cum se poate observa, invarianții sunt similari cu cei descriși pentru metoda \formatText{solves0Objects} și au rolul de a ajuta verificatorul să demonstreze corectitudinea postcondițiilor. Fără aceștia, el nu ar știi ce modificări s-ar produce în corpul buclei asupra variabilelor folosite. \par
+    Am folosit o buclă $while$, asemănător metodei \formatText{solves0Objects}, pentru a trece prin valorile parțiale ale capacității rucsacului, pornind de la 0 și incrementând cu 1 până la capacitatea totală a acestuia. Astfel, având metoda \formatText{solve} care iterează prin valorile posibile pentru $i$ (care reprezintă numărul de obiecte considerate) și metoda \formatText{getPartialProfits} care iterează prin valorile posibile pentru $j$ (care reprezintă capacitatea parțială pe care o poate avea rucsacul), acoperim toate subproblemele pentru care avem nevoie ca să ajungem la soluția finală. \par
+    Știm că avem cel puțin un obiect disponibil în acest punct al algoritmului. Numărul de obiecte este fix pentru această metodă, deci trebuie să luăm în considerare doar valoarile posibile ale capacității. Astfel, avem patru cazuri pe care trebuie să le considerăm:
+    \begin{itemize}
+        \item cazul în care capacitatea parțială a ruscacului este 0
+        \begin{Verbatim}[commandchars=\\\{\}]
+                        \PY{k}{if} \PY{n}{j} \PY{o}{==} \PY{l+m+mi}{0}
+\end{Verbatim}
+        este un caz special, îl putem considera tot un caz de bază. Capacitatea fiind 0 ar însemna că avem un rucsac ce nu poate susține niciun obiect, deci nu putem lua niciunul în acest punct al algoritmului. Acest caz este tratat în metoda \formatText{solvesCapacity0}:
+        \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{currentProfit} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
+\PY{n}{currentSolution} \PY{o}{:=} \PY{k+kt}{seq}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{y} \PY{o}{=}\PY{o}{\PYZgt{}} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+        Astfel, cel mai bun profit care se poate obține este 0, iar soluțiile optime conțin doar elemente de 0 pe fiecare poziție.
+        \item cazul în care greutatea obiectului depășește capacitatea parțială $j$ a rucsacului
+        \begin{Verbatim}[commandchars=\\\{\}]
+                    \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{n}{j}
+\end{Verbatim}
+        aferent ultimului $if$ oferă iarăși o alegere relativ simplă, obiectul nu poate fi adăugat în rucsac pentru subproblema cu $i$ obiecte și capacitate $j$, astfel că profitul va rămâne același ca în pasul anterior pentru aceeași capacitate, respectiv $profits[i - 1][j]$, iar soluția pentru subproblema curentă va fi cea de la pasul anterior, respectiv $solutions[i - 1][j]$ la care se va adăuga un 0 pentru a marca decizia luată în acest pas:
+        \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{currentProfit} \PY{o}{:=} \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{;}
+\PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solutions}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{;}
+\PY{n}{currentSolution} \PY{o}{:=} \PY{n}{currentSolution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+\end{Verbatim}
+        este implementarea din metoda \formatText{solvesAdd0TooBig}.
+        \item cazul în care greutatea obiectului curent nu depășeste capacitatea rucsacului și adăugarea acestuia aduce un profit mai bun decât cel anterior pentru aceeași capacitate $j$:
+        \begin{Verbatim}[commandchars=\\\{\}]
+ \PY{k}{if} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]} \PY{o}{\PYZgt{}} 
+                    \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}
+\end{Verbatim}
+        este cel care produce elementele de 1 în soluții, element care de această dată este adăugat soluției de pe poziția ce corespunde capacității rămase după ce am inclus greutatea obiectului. Profitul în acest caz este calculat adunând profitul de pe aceeași poziție a secvenței $profits$ și câștigul obiectului curent:
+        \begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{currentProfit} \PY{o}{:=} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} 
+    \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+\PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solutions}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+\PY{n}{currentSolution} \PY{o}{:=} \PY{n}{currentSolution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+\end{Verbatim}
+        Caz tratat în metoda \formatText{solvesAdd1BetterProfit}.
+        \item cazul în care deși greutatea obiectului curent nu depășește capacitatea $j$, includerea acestuia nu produce un profit mai bun față de excluziunea lui. În acest caz, un 0 este adăugat soluției de la pasul $solutions[i - 1][j]$, iar profitul rămâne același ca cel de pe poziția corespunzătoare din $profits$. Cazul este tratat în \formatText{solvesAdd0BetterProfit} și are implementare similară cu \formatText{solvesAdd0TooBig}.
+    \end{itemize}
+    După cum am menționat, fiecare caz va fi tratat într-o metodă diferită, unde fiecare condiție din $if$ va deveni o precondiție a metodei. Alte precondiții similare pentru aceste metode vor fi limitările legate de !
+    % de terminat aici
 
 \section{Leme importante}
 
--
+Lemele sunt declarații auxiliare folosite atunci când unele proprietăți logice ale verificării sunt mult prea complexe pentru Dafny pentru a le putea demonstra singur. Acestea nu au parametri de ieșire, servind doar ca un puternic instrument de ghidare al verificatorului în demonstrarea corectitudinii programului. Sunt declarate separat și pot avea, asemănător metodelor, precondiții și postcondiții. Astfel, o lemă va fi demonstrată separat luând în calcul toate posibilitățile aplicabile pentru parametri ce îndeplinesc precondițiile, având ca scop verificarea cu succes a postcondiției, care de altfel reprezintă proprietatea pe care dorim sa o clarificăm pentru Dafny. \par
+Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine care m-au ajutat în demonstrarea corectitudinii și optimalității algoritmului. \par
+\begin{enumerate}
+    \item Lema \formatText{computeGainAllZeros} 
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} 
+  \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}
+  \PY{k}{ensures} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}
+\PY{p}{\PYZob{}}
+  \PY{k}{if} \PY{n}{i} \PY{o}{==} \PY{l+m+mi}{0} \PY{p}{\PYZob{}}
+    \PY{k}{assert}  \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{p}{\PYZcb{}} \PY{k}{else} \PY{p}{\PYZob{}}
+    \PY{n}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    \hspace{2mm} Această lemă este demonstrată prin inducție și folosită pentru a arăta că dacă avem o soluție ce conține doar elemente de 0, atunci câștigul produs de o astfel de soluție nu poate fi decât 0. 
+    \item Lema \formatText{optimalSolCapacity0}
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolCapacity0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}
+ \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}
+ \PY{k}{requires} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
+  \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{o}{|} 
+   \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{s}\PY{o}{|}
+  \PY{k}{ensures} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}
+  \PY{p}{\PYZob{}}
+    \PY{k}{assert} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{k}{assert} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{n}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+    \PY{n}{gainCapacity0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+  \PY{k}{assert} \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{p}{::} \PY{p}{(}\PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+   \PY{o}{|}\PY{n}{s}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+  \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+     \item Lema \formatText{optimalSolAdd1}
+     \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
+    \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{n}{j}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
+    \PY{n}{solution1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{o}{|}\PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
+ \PY{k}{requires} \PY{n}{profit1} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{profit2} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profit1} \PY{o}{\PYZgt{}} \PY{n}{profit2}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{\PYZob{}}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k}{if} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0} \PY{p}{\PYZob{}}
+      \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{profit2} \PY{n}{by} 
+      \PY{p}{\PYZob{}}
+        \PY{n}{gainAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+        \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+        \PY{n}{weightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+        \PY{k}{assert} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}\PY{p}{;}
+      \PY{p}{\PYZcb{}}
+      \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{profit2} \PY{n}{by} 
+      \PY{p}{\PYZob{}}
+        \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+        \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{==} 
+            \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+      \PY{p}{\PYZcb{}}
+      \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;} 
+    \PY{p}{\PYZcb{}} \PY{k}{else} \PY{p}{\PYZob{}}
+      \PY{n}{gainAdd1Optimal}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profit1}\PY{p}{,} \PY{n}{profit2}\PY{p}{,} 
+        \PY{n}{solution1}\PY{p}{,} \PY{n}{solution2}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+      \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{p}{\PYZcb{}}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+     \item Lema \formatText{optimalSolAdd0}
+     \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
+    \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{n}{j}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
+    \PY{n}{solution1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} 
+    \PY{o}{|}\PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
+ \PY{k}{requires} \PY{n}{profit1} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{profit2} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profit1} \PY{o}{\PYZlt{}=} \PY{n}{profit2}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{if} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1} \PY{p}{\PYZob{}}
+      \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+      \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{profit1} \PY{n}{by} \PY{p}{\PYZob{}}
+        \PY{n}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+        \PY{k}{assert} \PY{n}{x1} \PY{o}{==} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+        \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} 
+            \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+      \PY{p}{\PYZcb{}}
+      \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+      \PY{n}{gainAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+      \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{+} 
+        \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZlt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+      \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
+    \PY{p}{\PYZcb{}}
+    \PY{k}{assert} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{n}{gainAdd0Optimal}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{profit1}\PY{p}{,} \PY{n}{profit2}\PY{p}{,} \PY{n}{solution1}\PY{p}{,} 
+        \PY{n}{solution2}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution2} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+     \item Lema \formatText{optimalSolAdd0TooBig}
+     \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0TooBig}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
+    \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} 
+    \PY{o}{|}\PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j} 
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{n}{j}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+  \PY{n}{weightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}  
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{n}{computeWeightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+     \item Lema \formatText{optimalSolRemove1}
+     \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
+    \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{solution}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+  \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+  \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
+        \PY{n}{x}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{s} \PY{o}{==} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{x} \PY{o}{==} \PY{n}{x1}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{x1}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} 
+        \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+     \item Lema \formatText{existsOptimalPartialSol}
+     \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
+ \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+ \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{ensures} \PY{n}{exists} \PY{n}{s} \PY{p}{::} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k+kd}{var} \PY{n}{k} \PY{p}{:} \PY{k+kt}{int} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{k+kd}{var} \PY{n}{completeSol} \PY{o}{:=} \PY{k+kt}{seq}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{y} \PY{o}{=}\PY{o}{\PYZgt{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+  \PY{k}{assert} \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{completeSol}\PY{p}{[}\PY{n}{q}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{;}
+  \PY{k+kd}{var} \PY{n}{sum} \PY{o}{:=} \PY{n}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+  \PY{k}{assert} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{exists} \PY{n}{s} \PY{p}{::} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{k+kd}{var} \PY{n}{q} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;} 
+    \PY{k+kd}{var} \PY{n}{currentSol} \PY{o}{:=} \PY{k+kt}{seq}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{y} \PY{o}{=}\PY{o}{\PYZgt{}} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
+    \PY{n}{computeWeightAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{o}{|}\PY{n}{currentSol}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+    \PY{n}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{o}{|}\PY{n}{currentSol}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{o}{|}\PY{n}{currentSol}\PY{o}{|}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{==} \PY{l+m+mi}{0} \PY{o}{\PYZgt{}=} \PY{n}{q}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{sum} \PY{o}{==} \PY{n}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+    \PY{k}{while} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{n}{sum} \PY{o}{+} \PY{l+m+mi}{1}
+      \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}=} \PY{n}{sum} \PY{o}{+} \PY{l+m+mi}{1}
+      \PY{k}{invariant} \PY{err}{!}\PY{n}{exists} \PY{n}{s} \PY{p}{::} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+      \PY{k}{invariant} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+      \PY{k}{invariant} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+      \PY{k}{invariant} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{o}{|}\PY{n}{currentSol}\PY{o}{|}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{q}
+    \PY{p}{\PYZob{}}
+      \PY{k}{assert} \PY{n}{exists} \PY{n}{s\PYZus{}i} \PY{p}{::} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+        \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{)}\PY{p}{;}
+      \PY{k+kd}{var} \PY{n}{s\PYZus{}i} \PY{p}{:}\PY{o}{|} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+        \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{)}\PY{p}{;}
+      \PY{n}{currentSol} \PY{o}{:=} \PY{n}{s\PYZus{}i}\PY{p}{;}
+      \PY{n}{q} \PY{o}{:=} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{,} \PY{o}{|}\PY{n}{s\PYZus{}i}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+      \PY{n}{gainUpperBound}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s\PYZus{}i}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+    \PY{p}{\PYZcb{}}
+    \PY{k}{assert} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{o}{|}\PY{n}{currentSol}\PY{o}{|}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{sum} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;}
+    \PY{n}{gainUpperBound}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{currentSol}\PY{p}{,} \PY{n}{i}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+
+\end{enumerate}
 
 \section{Probleme întâmpinate}
 
 -
+
+\end{sloppypar}

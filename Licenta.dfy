@@ -429,22 +429,22 @@ lemma gainAdd0Optimal(p: Problem, profit1: int, profit2: int, solution1: Solutio
 
  ensures gain(p, x) == gain(p, solution2 + [0])
 {
-  var x' := x[..i - 1];
-  assert x' == x[..|x| - 1];
+  var x1 := x[..i - 1];
+  assert x1 == x[..|x| - 1];
   gainAdd0(p, x);
-  assert gain(p, x) == gain(p, x[..i - 1]) == gain(p, x');
+  assert gain(p, x) == gain(p, x[..i - 1]) == gain(p, x1);
 
   optimalSolRemove0(p, x, i, j);
-  assert isOptimalPartialSolution(p, x', i - 1, j);
+  assert isOptimalPartialSolution(p, x1, i - 1, j);
 
-  assert gain(p, x') == gain(p, solution2);
+  assert gain(p, x1) == gain(p, solution2);
   
   gainAdd0(p, solution2 + [0]);
   assert gain(p, solution2) == gain(p, solution2 + [0]);
 
   gainAdd0(p, x);
-  assert x == x' + [0];
-  assert gain(p, x' + [0]) == gain(p, x) == gain(p, solution2 + [0]);
+  assert x == x1 + [0];
+  assert gain(p, x1 + [0]) == gain(p, x) == gain(p, solution2 + [0]);
 }
 
 lemma optimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution, solution2: Solution, i: int, j: int)
@@ -468,15 +468,15 @@ lemma optimalSolAdd0(p: Problem, profit1: int, profit2: int, solution1: Solution
     var x : Solution :| isOptimalPartialSolution(p, x, i, j);
 
     if x[i - 1] == 1 {
-      var x' := x[..i - 1];
-      assert gain(p, x') == profit1 by {
+      var x1 := x[..i - 1];
+      assert gain(p, x1) == profit1 by {
         optimalSolRemove1(p, x, i, j);
-        assert x' == x[..|x| - 1];
-        assert isOptimalPartialSolution(p, x', i - 1, j - p.weights[i - 1]);
+        assert x1 == x[..|x| - 1];
+        assert isOptimalPartialSolution(p, x1, i - 1, j - p.weights[i - 1]);
       }
       gainAdd1(p, x);
       gainAdd0(p, solution2 + [0]);
-      assert gain(p, x) == gain(p, x') + p.gains[i - 1] <= gain(p, solution2 + [0]);
+      assert gain(p, x) == gain(p, x1) + p.gains[i - 1] <= gain(p, solution2 + [0]);
       assert false;
     }
     assert x[i - 1] == 0;
@@ -780,12 +780,6 @@ method solve(p: Problem) returns (profit: int, solution: Solution)
         i := i + 1; 
     }
 
-    for i: int := 0 to |solutions|
-    { 
-      print solutions[i];
-      print "\n";
-    }
-    
     solution := solutions[p.n][p.c];
     assert isOptimalSolution(p, solution);
 
@@ -806,10 +800,9 @@ method solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
 {
         partialProfits := [];
         var j := 0;
-        var currentSolution := [];
         partialSolutions := [];
 
-         while j <= p.c
+        while j <= p.c
           invariant 0 <= j <= p.c + 1
           invariant |partialProfits| == j
           invariant |partialSolutions| == j
@@ -818,7 +811,7 @@ method solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
           invariant forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
         {
           partialProfits := partialProfits + [0];
-          currentSolution := [];
+          var currentSolution := [];
           emptySolOptimal(p, currentSolution, i, j);
           assert isOptimalPartialSolution(p, currentSolution, i, j);
           partialSolutions := partialSolutions + [currentSolution];

@@ -18,7 +18,7 @@ Principalele abordări prin care soluțiile sunt stocate când folosim programar
 \begin{itemize}
      \item \textbf{Memoizarea (Top-Down)} este abordarea recursivă, în care rezultatele sunt salvate într-un tabel de unde vor fi accesate ulterior când este nevoie de rezultatul deja calculat;
      \item \textbf{Tabelizarea (Bottom-Up)} este abordarea în care se pornește de la calcularea celor mai mici subprobleme, construind treptat soluția finală din soluțiile subproblemelor mai mici.
-\end{itemize}
+\end{itemize} \par
 În general, paradigma programării dinamice este folosită pentru a rezolva problemele de optimizare care au ca obiectiv obținerea celei mai bune soluții într-un cadru de optimizare, fie pentru minimizare, fie pentru maximizare. \par
 
 
@@ -124,7 +124,8 @@ $\bullet$ Pentru subproblema $(i = 4, j = 3)$ putem adăuga doar al doilea obiec
 $\bullet$ Pentru subproblema $(i = 4, j = 5)$ putem adăuga al treilea obiect; \par
 $\bullet$ Pentru subproblema $(i = 4, j = 6)$ putem adăuga primul și al treilea obiect; \par
 $\bullet$ Pentru subproblema $(i = 4, j = 7)$ putem adăuga al doilea și al treilea obiect; \par
-$\bullet$ Ajungem la $(i = 4, j = 8)$ care este problema inițială și adaugăm al doilea și ultimul obiect, iar profitul maxim care se poate obține pornind de la datele de intrare este 8: \par
+$\bullet$ Ajungem la $(i = 4, j = 8)$ care este problema inițială și putem adăuga al doilea și ultimul obiect, iar profitul maxim care se poate obține pornind de la datele de intrare este 8:
+\clearpage
 
 \resulttable{4}{
     0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
