@@ -25,10 +25,10 @@ Principalele abordări prin care soluțiile sunt stocate când folosim programar
 \subsection*{Ce este Problema Rucsacului?}
 Problema rucsacului este o problemă de optimizare. Presupunând că avem un rucsac care poate susține o anumită greutate maximă numită capacitate, trebuie sa alegem dintr-o mulțime mai largă de obiecte un număr limitat  astfel încât valoarea totală a acestora este maximă, iar greutatea totală a obiectelor nu depășește capacitatea rucsacului. Cele mai cunoscute variațiuni ale acestei probleme sunt varianta continuă și varianta discretă. \par 
 În varianta continuă, obiectele pot fi fracționate în mai multe bucăți, permițând alegerea parțială a unui obiect. \par
-În varianta discretă fiecare obiect poate fi ales o singură dată sau deloc. Pentru varianta discretă, abordările greedy nu produc mereu o soluție optimă. Astfel vom considera mai departe rezolvarea variantei discrete a problemei rucsacului.
+În varianta discretă fiecare obiect poate fi ales o singură dată sau deloc. Pentru varianta discretă, abordările greedy nu produc mereu o soluție optimă. 
 
 \subsection*{Formularea problemei}
-Pentru a înțelege mai bine ideea problemei și cum funcționează algoritmul vom considera următorul exemplu:
+Pentru a înțelege mai bine ideea problemei și cum funcționează algoritmul vom considera ca exemplu următoarea instanță a problemei pe care am folosit-o în cadrul procesului de implementare:
 \begin{textbox}
 \textbf{Date de intrare:} \par
 $\bullet$ \textit{n = 4}, unde \textit{n} este numărul total de obiecte pe care le avem la dispoziție; \par
@@ -37,8 +37,8 @@ $\bullet$ \textit{gains = [1, 2, 5, 6]}, unde \textit{gains} reprezintă un vect
 $\bullet$ \textit{weights = [2, 3, 4, 5]}, unde \textit{weights} reprezintă un vector de lungime n cu greutățile fiecărui obiect.
 \end{textbox}
 
-Scopul algoritmului este de a alege obiectele pentru a maximiza profitul obținut respectând în același timp constrângerea de a nu depăși capacitatea rucsacului. Astfel, la fiecare pas algoritmul va trebui sa aleagă una din cele două obțiuni disponibile: fie obiectul va fi adăugat în rucsac integral astfel considerându-se greutatea si profitul adus de acesta, fie obiectul nu va fi adăugat în rucsac. \par
-Următoarea schiță a algoritmului implementat poate fi folosită pentru a rezolva varianta discretă a problemei rucsacului:
+Scopul algoritmului este de a alege obiectele pentru a maximiza profitul obținut respectând în același timp constrângerea de a nu depăși capacitatea rucsacului. Astfel, la fiecare pas algoritmul va trebui sa aleagă una din cele două obțiuni disponibile: fie obiectul va fi adăugat în rucsac integral astfel considerându-se greutatea si profitul adus de acesta, fie obiectul nu va fi inclus în rucsac. \par
+Voi prezenta acum o schiță a algoritmului implementat de către mine care poate fi folosită pentru a rezolva varianta discretă a problemei rucsacului și pentru a obține profitul maxim pentru o instanță a problemei:
 
 \begin{tcolorbox}[mystyle]
 \begin{enumerate}[left=0.2em]
@@ -46,18 +46,18 @@ Următoarea schiță a algoritmului implementat poate fi folosită pentru a rezo
     \begin{itemize}
         \item Inițializăm o matrice \(profits\) de dimensiune \((n + 1) \times (c + 1)\), unde fiecare \( profits[i][j]\) reprezintă profitul maxim posibil obținut pentru o subproblemă în care sunt considerate disponibile maxim \(i\) obiecte, iar rucsacul poate susține o capacitate maximă \(j\);
         \item Inițializăm cazurile de bază:
-        \par - prima linie din matrice, care reprezintă cazul în care pentru orice capacitate de la \(0\) până la \(j\) vom considera că nu avem obiecte disponibile. 
-        \par - capacitatea rucsacului este \(0\) deoarece profitul maxim posibil care se poate obține este \(0\).
+        \par - prima linie din matrice, care reprezintă cazul în care pentru orice capacitate de la 0 până la \(j\) vom considera că nu avem obiecte disponibile $\rightarrow$ profitul maxim este 0
+        \par - prima coloană din matrice, în care capacitatea rucsacului este 0 $\rightarrow$ profitul maxim posibil 0.
     \end{itemize}
     \item \textbf{Procesul iterativ:}
-    Pentru fiecare obiect \(i\) și fiecare capacitate posibilă \(j\) vom considera următoarele cazuri:
+    Pentru fiecare obiect \(i\) și fiecare capacitate \(j\) vom considera următoarele cazuri:
     \begin{enumerate}
         \item Obiectul nu poate fi inclus \par
-            $\bullet$ greutatea obiectului curent \(weights[i - 1]\) depășește capacitatea \(j\), atunci profitul pentru pasul curent rămâne aceelași ca pentru \(i - 1\) obiecte: \[profits[i][j] = profits[i - 1][j].\]
+            $\bullet$ greutatea obiectului curent \(weights[i - 1]\) depășește capacitatea \(j\), atunci profitul pentru pasul curent rămâne același ca pentru \(i - 1\) obiecte: \[profits[i][j] = profits[i - 1][j].\]
         \item Obiectul poate fi inclus \par
         Ștind că în acest punct greutatea obiectului nu depășește capacitatea \(j\), avem două opțiuni posibile: \par
-        $\bullet$ dacă se obține un profit mai bun decât cel anterior adăugând obiectul, atunci adăugăm valoarea obiectului curent \(gains[i - 1]\) la valoarea obținută pentru capacitatea rămasă \(j - weights[i - 1]\): \[profits[i][j] = profits[i - 1][j = weights[i - 1]] + gains[i - 1].\] \par
-        $\bullet$ dacă se obține un profit cel mult la fel de bun ca profitul anterior obținut pentru capacitate \(j\) atunci se va lua profitul maxim obținut fără acest obiect: \[profits[i][j] = profits[i - 1][j].\] 
+        $\bullet$ dacă se obține un profit mai bun decât cel anterior prin adăugarea obiectului atunci adăugăm valoarea obiectului curent \(gains[i - 1]\) la valoarea obținută pentru capacitatea rămasă \(j - weights[i - 1]\): \[profits[i][j] = profits[i - 1][j = weights[i - 1]] + gains[i - 1].\] \par
+        $\bullet$ dacă se obține un profit cel mult la fel de bun ca profitul anterior obținut pentru aceeași capacitate \(j\) atunci se va lua profitul maxim obținut fără acest obiect: \[profits[i][j] = profits[i - 1][j].\] 
     \end{enumerate}
     \item \textbf{Rezultatul:}
     La finalul execuției algoritmului, soluția finală care se poate obține se află în \(profits[n][c]\) și reprezintă profitul maxim care se poate obține utilizând toate obiectele pe care le avem la dispoziție pentru un rucsac de capacitate maximă \(c\).
@@ -67,9 +67,9 @@ Următoarea schiță a algoritmului implementat poate fi folosită pentru a rezo
 Pentru a stoca soluțiile, algoritmul folosește abordarea Bottom-Up în care punctul de start îl reprezintă cazul de bază. După cum am văzut în schița algoritmului prezentat anterior, adeseori pe parcusul execuției vom avea nevoie de profitul calculat în pasul anterior obținut pentru \(i - 1\) obiecte având aceeași capacitate \(j\). Aici intervine proprietatea \textbf{problemelor suprapuse}, în care aceeași subproblemă este rezolvată de mai multe ori în timpul execuției. \par
 De asemenea, problema inițială pentru un rucsac de capacitate \(c\) cu \(i\) obiecte poate fi construită astfel din capacitățile \(c - weights[i - 1]\), 
 iar fiecare celulă din matricea \textit{profits} stochează rezultatul optim pentru o subproblemă care implică primele \(i\) obiecte și o capacitate \(j\). Am văzut că la fiecare pas al procesului iterativ, mereu se va considera profitul maxim care se poate obține bazat pe două posibile decizii: \par
-$\bullet$ Dacă obiectul curent este inclus în soluție, atunci rezultatul va fi calculat din profitul obiectului la care se adaugă soluția subproblemei pentru greutatea rămasă \(j - weights[i - 1]\), soluție care știm că este optimă pentru \(i\) obiecte si capacitate \(j - weights[i - 1]\); \par
-$\bullet$ Altfel dacă obiectul nu este inclus, soluția va rămâne aceeași ca cea pentru \(i - 1\) obiecte și capacitate \(j\), soluție care știm că este optimă pentru \(i - 1\) obiecte si capacitate \(j\). \par
-Aici intervine cea de-a doua proprietate specifică programării dinamice, mai exact faptul că soluția globală este mereu compusă din soluțiile optime ale subproblemelor, numită proprietatea de \textbf{substructură optimă}.
+$\bullet$ Dacă obiectul curent este inclus în soluție, atunci rezultatul va fi calculat din profitul obiectului la care se adaugă soluția subproblemei pentru greutatea rămasă \(j - weights[i - 1]\), soluție despre care știm că este optimă pentru \(i\) obiecte si capacitate \(j - weights[i - 1]\); \par
+$\bullet$ Altfel dacă obiectul nu este inclus, soluția va rămâne aceeași ca cea pentru \(i - 1\) obiecte și capacitate \(j\), soluție despre care știm că este optimă pentru \(i - 1\) obiecte si capacitate \(j\). \par
+Aici intervine cea de-a doua proprietate specifică programării dinamice, numită proprietatea de \textbf{substructură optimă} care constă în faptul că soluția globală poate fi mereu construită din soluțiile optime ale subproblemelor.
 \\ \par
 Aplicând algoritmul pentru a obține profitul maxim pentru datele de intrare de mai sus, voi explica următoarele notații:
 \begin{itemize}
