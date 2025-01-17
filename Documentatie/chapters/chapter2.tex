@@ -1,14 +1,69 @@
-\chapter{Titlul celui de-al doilea capitol}
-Facilisi nullam vehicula ipsum a arcu. Purus semper eget duis at tellus at. Adipiscing tristique risus nec feugiat. Eu volutpat odio facilisis mauris sit. Porta nibh venenatis cras sed. Penatibus et magnis dis parturient. Sollicitudin aliquam ultrices sagittis orci a. Senectus et netus et malesuada fames ac turpis egestas integer. Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum. Leo vel fringilla est ullamcorper eget nulla facilisi etiam dignissim. Nulla aliquet enim tortor at auctor urna nunc id cursus. Elit duis tristique sollicitudin nibh. Sagittis nisl rhoncus mattis rhoncus urna neque viverra. Convallis posuere morbi leo urna molestie at. Quisque egestas diam in arcu cursus euismod.
+\chapter{Reprezentarea soluțiilor}
 
-\section{Titlul secțiunii 1}
+\begin{sloppypar}
 
-A diam sollicitudin tempor id eu nisl. Hac habitasse platea dictumst vestibulum. Integer enim neque volutpat ac tincidunt. Facilisi nullam vehicula ipsum a arcu cursus vitae congue. Vel turpis nunc eget lorem. Vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare. Nunc sed blandit libero volutpat. Sit amet luctus venenatis lectus magna fringilla urna porttitor. Hac habitasse platea dictumst quisque sagittis purus. Sed faucibus turpis in eu mi bibendum neque egestas. Vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur. Erat nam at lectus urna duis convallis convallis tellus id. Tristique sollicitudin nibh sit amet commodo nulla facilisi nullam vehicula. Etiam dignissim diam quis enim lobortis scelerisque. Nunc congue nisi vitae suscipit tellus mauris a diam maecenas. Lacus viverra vitae congue eu consequat ac felis donec. Mauris sit amet massa vitae tortor condimentum. Mauris augue neque gravida in. Lorem ipsum dolor sit amet. Arcu dui vivamus arcu felis bibendum ut tristique et.
+În cadrul problemei rucsacului putem discuta despre ce reprezintă soluția optimă, cât și soluțiile parțiale optime. \par
+Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o secvență de secvențe numită \texttt{profits} de tip \texttt{seq<seq<int>>}. Deși la bază această variabilă este o secvență, ea poate fi privită ca o matrice bidimensională, iar rezultatele pot fi accesate folosind operatorul de indexare similar unui astfel de tablou: $profits[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm. 
+\par
+Pe lângă matricea \texttt{profits}, această lucrare se mai bazează și pe o variabilă numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>} care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Ea poate fi privită tot ca un tablou multidimensional, de aceea rezultatele sunt accesate similar matricei profits.
+\par
+O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului. Această soluție adresează problema completă, deținând decizia de includere a fiecărui obiect, iar profitul calculat trebuie să aibă cea mai mare valoare pe care o putem obține pentru instanța primită.  În cazul acestei lucrări, acest predicat este folosit pentru a verifica soluția finală (despre care am discutat în capitolul anterior). Pentru exprimarea acestor proprietăți am formulat predicatul \formatText{isOptimalSolution} astfel:
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
+    \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}}
+  \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{p}{::} \PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{isOptimalPartialSolution}\PY{p}{(}
+    \PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{)}\PY{p}{)} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+\par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea. Sunt esențiale pentru Dafny deoarece reduc ambiguitatea prin definirea clară a informațiilor pe care trebuie să le știm despre parametrii oferiți și permit astfel validarea corectitudinii logice ale programului, fără a fi necesară verificarea acestora pe parcurs. De asemenea, sunt folositoare și pentru a verifica dacă apelurile către componentele logice au fost conform așteptărilor.
 
-\section{Titlul secțiunii 2}
+O \formatText{soluție optimă parțială} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ și aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8. Pentru a verifica dacă avem o astfel de soluție am implementat predicatul \formatText{isOptimalPartialSolution}:
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
+    \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+\PY{p}{\PYZob{}}
+  \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}}
+  \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{p}{::} \PY{p}{(}\PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+    \PY{o}{|}\PY{n}{s}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+\par Acest predicat verifică dacă orice altă soluție parțială pentru o subproblemă cu $i$ obiecte și capacitate $j$ a rucsacului va avea câștigul mai mic sau cel mult egal cu cel al soluției noastre. 
 
-Sit amet mauris commodo quis imperdiet massa tincidunt nunc pulvinar. Ligula ullamcorper malesuada proin libero nunc consequat interdum. Mauris a diam maecenas sed enim ut. Ut sem nulla pharetra diam sit amet nisl suscipit adipiscing. Leo duis ut diam quam nulla. Neque ornare aenean euismod elementum. Vitae sapien pellentesque habitant morbi tristique senectus. Lectus magna fringilla urna porttitor rhoncus dolor purus non enim. Egestas sed sed risus pretium quam vulputate dignissim suspendisse in. At quis risus sed vulputate odio ut enim. Hac habitasse platea dictumst quisque sagittis. Lectus vestibulum mattis ullamcorper velit sed. Massa vitae tortor condimentum lacinia quis vel eros donec ac. Vulputate dignissim suspendisse in est ante. Sed faucibus turpis in eu mi bibendum neque. Enim eu turpis egestas pretium aenean pharetra magna. Tellus mauris a diam maecenas.
+\par O \formatText{soluție parțială} este o secvență binară de o lungime variabilă care nu depășește numărul de obiecte și care respectă constrângerea legată de capacitatea rucsacului. Predicatul formulat pentru a confirma o astfel de soluție este \formatText{isPartialSolution}:
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{predicate} \PY{n+nf}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
+        \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+\PY{p}{\PYZob{}}
+  \PY{n}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==} \PY{n}{i} \PY{o}{\PYZam{}\PYZam{}}
+  \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    și vine în completarea predicatului \formatText{isValidPartialSolution}:
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{predicate} \PY{n+nf}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{n}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+\par Cu ajutorul celor două predicate am verificat dacă o soluție este parțială și validă: are doar elemente de 0 și 1, lungimea acesteia nu depășește numărul de obiecte și are o greutate cel mult egală cu capacitatea $j$ a rucsacului. Predicatul apelat \formatText{hasAllowedValues} este definit astfel:
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{predicate} \PY{n+nf}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
+\PY{p}{\PYZob{}}
+  \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0} 
+        \PY{o}{|}\PY{o}{|} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+    și asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 \(-\) obiectul nu este în rucsac, 1 \(-\) obiectul este în rucsac.
 
-\section{Titlul secțiunii 3}
-
-Faucibus ornare suspendisse sed nisi lacus sed. Mi in nulla posuere sollicitudin aliquam ultrices. Lacus suspendisse faucibus interdum posuere lorem ipsum dolor sit amet. Odio tempor orci dapibus ultrices in iaculis nunc sed augue. Congue eu consequat ac felis donec et odio. Enim ut sem viverra aliquet eget sit amet. Sit amet consectetur adipiscing elit duis tristique sollicitudin. Quis blandit turpis cursus in. Cras fermentum odio eu feugiat pretium nibh ipsum consequat nisl. Non curabitur gravida arcu ac tortor dignissim convallis aenean. Porta non pulvinar neque laoreet suspendisse interdum consectetur libero id. Lacus viverra vitae congue eu consequat ac felis. Vulputate dignissim suspendisse in est ante in nibh mauris. Amet mauris commodo quis imperdiet massa. Varius sit amet mattis vulputate enim nulla aliquet. Pellentesque diam volutpat commodo sed egestas egestas. Amet est placerat in egestas erat imperdiet sed euismod. Scelerisque varius morbi enim nunc faucibus a pellentesque sit. Ut sem viverra aliquet eget sit amet tellus cras. Sem integer vitae justo eget magna fermentum iaculis eu.
+\end{sloppypar}
