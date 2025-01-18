@@ -4,7 +4,7 @@
 \chapter{Reprezentarea datelor de intrare și de ieșire}
 
 În următoarele capitole voi detalia implementarea algoritmului, dar și modul în care Dafny evaluează corectitudinea și optimalitatea codului. \par 
-Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date \formatText{Problem} astfel:
+Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date $Problem$ astfel:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{datatype} \PY{n+nc}{Problem} \PY{o}{=} \PY{n}{Problem}\PY{p}{(}\PY{n}{n}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{c}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{gains}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} 
@@ -17,10 +17,10 @@ unde:
     \item câmpul \textit{\textbf{\textcolor{coleight}{gains}}} este o secvență ce memorează profitul fiecărui obiect;
     \item câmpul \textit{\textbf{\textcolor{coleight}{weights}}} este o secvență ce memorează greutatea fiecărui obiect.
 \end{itemize} \par
-Folosind cuvântul cheie \formatText{datatype} am definit un nou tip de date inductiv numit \formatText{Problem} cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă.
+Folosind cuvântul cheie \formatText{datatype} am definit un nou tip de date inductiv numit $Problem$ cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă.
 \par
-Atât profitul, cât și greutatea fiecărui obiect pot fi accesate prin indexul corespunzător poziției din secvență. Spre exemplu, pentru a accesa greutatea celui de-al doilea obiect este folosit operatorul de indexare $weights[1]$, deoarece indexarea celor două secvențe începe de la 0. În dafny, o \textit{secvență} este o colecție de elemente de același tip, iar în cazul acesta, de numere întregi.  \par
-Orice instanța a problemei oferită la intrare trebuie să fie validă și să respecte anumite condiții pentru ca algoritmul să poată produce o soluție corectă. Pentru a mă asigura că aceste condiții sunt îndeplinite a fost nevoie să formulez un predicat. \formatText{Predicatele} în Dafny sunt funcții ale călor rezultate sunt valori boolene. Acestea sunt folosite pentru a evalua proprietăți care de obicei trebuie să fie adevărate și de aceea ele ajută în procesul de verificare al corectitudinii. Astfel, am definit predicatul \formatText{isValidProblem} care verifică dacă avem cel puțin un obiect la dispoziție și un rucsac de capacitate mai mare decât zero, dacă știm greutatea și câștigul fiecărui obiect, iar acestea au valori pozitive diferite de zero:
+Atât profitul, cât și greutatea fiecărui obiect pot fi accesate prin indexul corespunzător poziției din secvență. Spre exemplu, pentru a accesa greutatea celui de-al doilea obiect este folosit operatorul de indexare $weights[1]$, deoarece indexarea celor două secvențe începe de la 0. În dafny, o \textbf{secvență} este o colecție de elemente de același tip, iar în cazul acesta, de numere întregi.  \par
+Orice instanța a problemei oferită la intrare trebuie să fie validă și să respecte anumite condiții pentru ca algoritmul să poată produce o soluție corectă. Pentru a mă asigura că aceste condiții sunt îndeplinite a fost nevoie să formulez un predicat. \textbf{Predicatele} în Dafny sunt funcții ale călor rezultate sunt valori boolene. Acestea sunt folosite pentru a evalua proprietăți care de obicei trebuie să fie adevărate și de aceea ele ajută în procesul de verificare al corectitudinii. Astfel, am definit predicatul \formatText{isValidProblem} care verifică dacă avem cel puțin un obiect la dispoziție și un rucsac de capacitate mai mare decât zero, dacă știm greutatea și câștigul fiecărui obiect, iar acestea au valori pozitive diferite de zero:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{)}
 \PY{p}{\PYZob{}}
