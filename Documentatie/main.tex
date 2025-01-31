@@ -20,6 +20,8 @@
 \usepackage{fancyvrb}
 \usepackage{color}
 \usepackage{upquote,textcomp}
+\usepackage{url}
+\usepackage[colorinlistoftodos]{todonotes}
 
 
 % includes options
@@ -62,7 +64,7 @@ colback=white
 
 \newcommand{\resulttable}[2]{ %
     \begin{table}[!ht]
-        \caption*{Matricea profits pentru $i = #1$}
+        \caption*{Matricea \textit{profits} pentru $i = #1$}
         \centering
         \begin{tblr}{
             colspec={llllllllll},
@@ -188,6 +190,7 @@ colback=white
 \def\PYZat{@}
 \def\PYZlb{[}
 \def\PYZrb{]}
+\def\UrlBreaks{\do\/\do-}
 \makeatother
 
 \graphicspath{{images/}}        % path where the images are located
@@ -228,5 +231,6 @@ colback=white
     \input{chapters/chapter6}
     
     \input{chapters/conclusions}
-    \input{chapters/bibliography}
+    \bibliography{chapters/references} 
+    \bibliographystyle{ieeetr}
 \end{document}

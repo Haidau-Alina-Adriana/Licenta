@@ -3,11 +3,11 @@
 \begin{sloppypar}
 
 În cadrul problemei rucsacului putem discuta despre ce reprezintă soluția optimă, cât și soluțiile parțiale optime. \par
-Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o secvență de secvențe numită \texttt{profits} de tip \texttt{seq<seq<int>>}. Deși la bază această variabilă este o secvență, ea poate fi privită ca o matrice bidimensională, iar rezultatele pot fi accesate folosind operatorul de indexare similar unui astfel de tablou: $profits[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm. 
+Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o secvență de secvențe numită \texttt{profits} de tip \texttt{seq<seq<int>>}. Deși la bază această variabilă este o secvență, ea poate fi privită ca o matrice bidimensională, iar rezultatele pot fi accesate folosind operatorul de indexare similar unui astfel de tablou: $\textit{profits}[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm. 
 \par
-Pe lângă matricea \texttt{profits}, această lucrare se mai bazează și pe o variabilă numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>} care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Ea poate fi privită tot ca un tablou multidimensional, de aceea rezultatele sunt accesate similar matricei profits.
+Pe lângă matricea \texttt{profits}, această lucrare se mai bazează și pe o variabilă numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>} care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Ea poate fi privită tot ca un tablou multidimensional, de aceea rezultatele sunt accesate similar matricei \textit{profits}.
 \par
-O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului. Această soluție adresează problema completă, deținând decizia de includere a fiecărui obiect, iar profitul calculat trebuie să aibă cea mai mare valoare pe care o putem obține pentru instanța primită.  În cazul acestei lucrări, acest predicat este folosit pentru a verifica soluția finală (despre care am discutat în capitolul anterior). Pentru exprimarea acestor proprietăți am formulat predicatul \formatText{isOptimalSolution} astfel:
+O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului. Această soluție adresează problema completă, deținând decizia de includere a fiecărui obiect, iar profitul calculat trebuie să aibă cea mai mare valoare pe care o putem obține pentru instanța primită.  În cazul acestei lucrări, pentru a verifica soluția finală (despre care am discutat în capitolul anterior) am formulat predicatul \formatText{isOptimalSolution} astfel:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
     \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
@@ -19,22 +19,9 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
     \PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{,} \PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{)}\PY{p}{)} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}\PY{p}{)}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea. Sunt esențiale pentru Dafny deoarece reduc ambiguitatea prin definirea clară a informațiilor pe care trebuie să le știm despre parametrii oferiți și permit astfel validarea corectitudinii logice ale programului, fără a fi necesară verificarea acestora pe parcurs. De asemenea, sunt folositoare și pentru a verifica dacă apelurile către componentele logice au fost conform așteptărilor.
 
-O \formatText{soluție optimă parțială} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție optimă parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ deoarece aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8. Pentru a verifica dacă avem o astfel de soluție am implementat predicatul \formatText{isOptimalPartialSolution}:
-    \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
-    \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
-  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
-  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
-  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
-\PY{p}{\PYZob{}}
-  \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}}
-  \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{p}{::} \PY{p}{(}\PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
-    \PY{o}{|}\PY{n}{s}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}
-\PY{p}{\PYZcb{}}
-\end{Verbatim}
-\par Acest predicat verifică dacă orice altă soluție parțială pentru o subproblemă cu $i$ obiecte și capacitate $j$ a rucsacului va avea câștigul mai mic sau cel mult egal cu cel al soluției noastre. 
+\par Cuvântul cheie \texttt{ghost} este folosit pentru a marca faptul că acest predicat este folosit doar în partea de verificare și nu este inclus în codul executabil. \cite{leino2021dafny}
+\par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea. \cite{DBLP:series/natosec/KoenigL12} Sunt esențiale pentru Dafny deoarece dacă acestea nu sunt satisfăcute la momentul apelului, atunci nu mai există nicio garanție privind comportamenul corect al programului.
 
 \par O \formatText{soluție parțială} este o secvență binară de o lungime variabilă care nu depășește numărul de obiecte și care respectă constrângerea legată de capacitatea rucsacului. Predicatul formulat pentru a confirma o astfel de soluție este \formatText{isPartialSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
@@ -64,6 +51,21 @@ O \formatText{soluție optimă parțială} reprezintă un rezultat optim interme
         \PY{o}{|}\PY{o}{|} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    și asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 \(-\) obiectul nu este în rucsac, 1 \(-\) obiectul este în rucsac.
+    și asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 reprezintă faptul că obiectul nu este inclus în rucsac, iar 1 înseamnă că obiectul este inclus în rucsac.
+
+O \formatText{soluție optimă parțială} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție optimă parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ deoarece aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8. Pentru a verifica dacă avem o astfel de soluție am implementat predicatul \formatText{isOptimalPartialSolution}:
+    \begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
+    \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
+  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
+  \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+\PY{p}{\PYZob{}}
+  \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}}
+  \PY{k}{forall} \PY{n}{s}\PY{p}{:} \PY{n}{Solution} \PY{p}{::} \PY{p}{(}\PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+    \PY{o}{|}\PY{n}{s}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZgt{}=} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{)}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
+\par Acest predicat verifică dacă orice altă soluție parțială pentru o subproblemă cu $i$ obiecte și capacitate $j$ a rucsacului va avea câștigul mai mic sau cel mult egal cu cel al soluției noastre. 
 
 \end{sloppypar}
