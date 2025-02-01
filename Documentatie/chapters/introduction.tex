@@ -5,23 +5,23 @@
 În acest capitol introductiv voi face o scurtă prezentare a limbajului Dafny, urmată de câteva puncte esențiale despre paradigma programării dinamice și câteva detalii despre Problema Rucsacului.
 
 \subsection*{Limbajul de programare Dafny}
-Dafny este un limbaj de programare imperativ și funcțional, ce oferă suport pentru programarea orientată pe obiecte și ce este destinat verificării formale a corectudinii programelor. \cite{enwiki:1265861302} A fost creat pentru a ajuta programatorii să scrie cod care este corect din punct de vedere al specificațiilor. Un lucru foarte interesant de știut despre acest limbaj este faptul că a fost conceput astfel încât permite verificarea codului încă din faza de dezvoltare, înainte de a rula codul. Datorită faptului că verificatorul Dafny este rulat ca parte a compilatorului, orice eroare matematică sau logică va fi semnalată către programator care va trebui să ajute verificatorul prin ajustarea specificațiilor sau a logicii. \cite{leino2021dafny}
+Dafny este un limbaj de programare imperativ și funcțional, ce oferă suport pentru programarea orientată pe obiecte și ce este destinat verificării formale a corectudinii programelor \cite{enwiki:1265861302}. A fost creat pentru a ajuta programatorii să scrie cod care este corect din punct de vedere al specificațiilor. Un lucru foarte interesant de știut despre acest limbaj este faptul că a fost conceput astfel încât permite verificarea codului încă din faza de dezvoltare, înainte de a rula codul. Datorită faptului că verificatorul Dafny este rulat ca parte a compilatorului, orice eroare matematică sau logică va fi semnalată către programator care va trebui să ajute verificatorul prin ajustarea specificațiilor sau a logicii \cite{leino2021dafny}.
 
 \subsection*{Programarea dinamică}
-Programarea dinamică este metodă generală folosită pentru a proiecta o clasă de algoritmi ce rezolvă probleme cu proprietăți similare. \cite{Algorithm-Design} Ea se bazează pe conceptul de suprapunere al subproblemelor, însemnând faptul că o problemă poate fi "spartă" în mai multe subprobleme mai mici care sunt mai ușor de rezolvat și care se repetă pe parcursul execuției algoritmului. 
-Soluțiile acestor subprobleme sunt stocate astfel încât să nu fie necesară recalcularea lor, reutilizând astfel soluțiile deja calculate pentru a optimiza procesul de calcul. \cite{DP-javatpoint} \par 
+Programarea dinamică este metodă de proiectare a unei clase de algoritmi ce rezolvă probleme cu proprietăți similare \cite{Algorithm-Design}. Ea se bazează pe conceptul de suprapunere al subproblemelor, însemnând faptul că o problemă poate fi "spartă" în mai multe subprobleme mai mici care sunt mai ușor de rezolvat și care se repetă pe parcursul execuției algoritmului. 
+Soluțiile acestor subprobleme sunt stocate astfel încât să nu fie necesară recalcularea lor, reutilizând astfel soluțiile deja calculate pentru a optimiza procesul de calcul \cite{DP-javatpoint}. \par 
 Principalele abordări prin care soluțiile sunt stocate când folosim programarea dinamică sunt:
 \begin{itemize}
      \item \textbf{Memoizarea (Top-Down)} este abordarea recursivă, în care rezultatele sunt salvate într-o structură de date de unde vor fi accesate ulterior când este nevoie de rezultatul deja calculat;
-     \item \textbf{Tabelizarea (Bottom-Up)} este abordarea în care se pornește de la calcularea celor mai mici subprobleme, construind treptat soluția finală din soluțiile subproblemelor mai mici. \cite{DP-GG}
+     \item \textbf{Tabelizarea (Bottom-Up)} este abordarea în care se pornește de la calcularea celor mai mici subprobleme, construind treptat soluția finală din soluțiile subproblemelor mai mici \cite{DP-GG}.
 \end{itemize} \par
-În general, paradigma programării dinamice este folosită pentru a rezolva problemele de optimizare care au ca obiectiv obținerea celei mai bune soluții într-un cadru de optimizare, fie pentru minimizare, fie pentru maximizare. \par
+În general, paradigma programării dinamice este folosită pentru a rezolva problemele de optimizare care au ca obiectiv obținerea celei mai bune soluții într-un cadru de optimizare, fie pentru minimizare, fie pentru maximizare \cite{Algorithm-Design}. \par
 
 
 \subsection*{Ce este Problema Rucsacului?}
 Problema rucsacului este o problemă de optimizare. Presupunând că avem un rucsac care poate susține o anumită greutate maximă numită capacitate, trebuie să alegem un subset de obiecte dintr-o mulțime astfel încât valoarea totală a acestora este maximă, iar greutatea totală a obiectelor nu depășește capacitatea rucsacului. Cele mai cunoscute variațiuni ale acestei probleme sunt varianta continuă și varianta discretă. \par 
-În varianta continuă, obiectele pot fi fracționate în mai multe bucăți, permițând alegerea parțială a unui obiect. Pentru această variantă a problemei, algoritmii greedy sunt mai potriviți datorită deciziilor bazate pe un criteriu local precum raport valoare/greutate, greutate mică sau câștig mare a obiectului, astfel eliminând riscul de a pierde combinații de obiecte. \par
-În varianta discretă fiecare obiect poate fi ales o singură dată sau deloc. Pentru varianta discretă abordările greedy nu pot garanta că la finalul execuției algoritmului soluția obținută este optimă. \cite{Algorithm-Design} Acest lucru este datorat naturii acestor algoritmi de a alege varianta cea mai profitabilă în momentul curent și ignoră alte combinații de obiecte care individual au un profit mai mic, dar împreună ar fi mult mai profitabile, de aceea acest tip de probleme necesită o abordare mai complexă precum programarea dinamică. \\
+În varianta continuă, obiectele pot fi fracționate în mai multe bucăți, permițând alegerea parțială a unui obiect. Pentru această variantă a problemei, algoritmii greedy sunt mai potriviți datorită deciziilor bazate pe un criteriu local precum raport valoare/greutate, greutate mică sau câștig mare a obiectului, astfel eliminând riscul de a pierde combinații de obiecte \cite{Algorithm-Design}. \par
+În varianta discretă fiecare obiect poate fi ales o singură dată sau deloc. Pentru varianta discretă abordările greedy nu pot garanta că la finalul execuției algoritmului soluția obținută este optimă \cite{Algorithm-Design}. Acest lucru este datorat naturii acestor algoritmi de a alege varianta cea mai profitabilă în momentul curent și ignoră alte combinații de obiecte care individual au un profit mai mic, dar împreună ar fi mult mai profitabile, de aceea acest tip de probleme necesită o abordare mai complexă precum programarea dinamică. \\
 
 \subsection*{Formularea problemei}
 Pentru a înțelege mai bine ideea problemei și cum funcționează algoritmul vom considera ca exemplu următoarea instanță a problemei:
@@ -29,8 +29,8 @@ Pentru a înțelege mai bine ideea problemei și cum funcționează algoritmul v
 \textbf{Date de intrare:} \par
 $\bullet$ $n = 4$, unde $n$ este numărul total de obiecte pe care le avem la dispoziție; \par
 $\bullet$ $c = 8$, unde $c$ reprezintă capacitatea totală a rucsacului; \par
-$\bullet$ $gains = [1, 2, 5, 6]$, unde $gains$ reprezintă un vector de lungime $n$ cu profitul pe care îl aduce fiecare obiect; \par
-$\bullet$ $weights = [2, 3, 4, 5]$, unde $weights$ reprezintă un vector de lungime $n$ cu greutatea fiecărui obiect.
+$\bullet$ $\textit{gains} = [1, 2, 5, 6]$, unde \textit{gains} reprezintă un vector de lungime $n$ cu profitul pe care îl aduce fiecare obiect; \par
+$\bullet$ $\textit{weights} = [2, 3, 4, 5]$, unde \textit{weights} reprezintă un vector de lungime $n$ cu greutatea fiecărui obiect.
 \end{textbox}
 
 \renewcommand{\labelitemi}{$\rightarrow$}
@@ -51,7 +51,7 @@ Voi explica următoarele notații care se aplică și în cadrul celorlalte capi
 \begin{enumerate}[left=0.2em]
     \item \textbf{Inițializarea:}
     \begin{itemize}
-        \item Declarăm o matrice $ \textit{profits} $ de dimensiune $ (n + 1) \times (c + 1) $, unde fiecare celulă $ \textit{profits}[i][j] $ reprezintă profitul maxim posibil obținut pentru o subproblemă în care sunt considerate disponibile maxim $i$ obiecte, iar rucsacul poate susține o capacitate maximă $j$;
+        \item Declarăm o matrice \textit{profits} de dimensiune $ (n + 1) \times (c + 1) $, unde fiecare celulă $ \textit{profits}[i][j] $ reprezintă profitul maxim posibil obținut pentru o subproblemă în care sunt considerate disponibile maxim $i$ obiecte, iar rucsacul poate susține o capacitate maximă $j$;
         \item Inițializăm prima linie din matrice cu 0. Acestea reprezintă cazurile în care pentru orice capacitate de la 0 până la $j$ vom considera că nu avem obiecte disponibile, deci profitul maxim este 0. 
     \end{itemize}
     \item \textbf{Procesul iterativ:}
@@ -92,7 +92,7 @@ Pentru $i = 2$ considerăm doar primele două obiecte și iterăm prin valorile 
 \begin{itemize}
 \item Pentru subproblema $(2,2)$ nu putem adăuga decât primul obiect, iar profitul optim rămâne 1; 
 \item Pentru subproblema $(2, 3)$ putem adăuga al doilea obiect deoarece aduce un profit mai bun decât cel anterior $\textit{profits}[i - 1][j]$ care este 1, iar restricția de a nu depăși capacitatea ruscacului este respectată; 
-\item Pentru subproblema $(2, 5)$ putem adăuga ambele obiecte în rucsac, iar profitul este calculat adunând câștigul obiectului cu profitul corespunzător capacității rămase după scăderea greutății obiectului, adică rezultatul subproblemei($i - 1, j - \textit{weights}[i - 1]$) care este 1: 
+\item Pentru subproblema $(2, 5)$ putem adăuga ambele obiecte în rucsac, iar profitul este calculat adunând câștigul obiectului cu profitul corespunzător capacității rămase după scăderea greutății obiectului, adică rezultatul subproblemei$(i - 1, j - \textit{weights}[i - 1])$ care este 1: 
 \end{itemize}
 
 \resulttable{2}{
@@ -103,7 +103,7 @@ Pentru $i = 2$ considerăm doar primele două obiecte și iterăm prin valorile 
 
 Aplicând aceeași logică pentru $i = 3$ vom obține următoarele rezultate: \par
 $\bullet$ Pentru subproblema $(3, 4)$ putem adăuga al treilea obiect deoarece aduce un profit mai bun decât rezultatul suproblemei anterioare cu aceeași capacitate $(2, 4)$; \par
-$\bullet$ Pentru subproblema $(3, 5)$ obținem un profit mai bun decât pentru ($2, 5$); \par
+$\bullet$ Pentru subproblema $(3, 5)$ obținem un profit mai bun decât pentru $(2, 5)$; \par
 $\bullet$ Pentru subproblema $(3, 6)$ putem adăuga primul și al treilea obiect aducând un profit mai bun decât profitul anterior pentru $(2, 6)$; \par
 $\bullet$ Pentru subproblema $(3, 7)$ putem adăuga al doilea și al treilea obiect obținând un profit de valoare 7 și greutate 7 $ \le j$, mai bun decât profitul anterior pentru $(2, 7)$; \par
 $\bullet$ Pentru subproblema $(3, 8)$ se obține un profit mai bun decât profitul calculat pentru subproblema anterioară $(2, 6)$: \par

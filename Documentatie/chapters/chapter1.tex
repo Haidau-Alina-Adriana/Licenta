@@ -4,7 +4,7 @@
 \chapter{Reprezentarea datelor de intrare și de ieșire}
 
 În următoarele capitole voi detalia implementarea algoritmului, modul în care Dafny evaluează corectitudinea, dar și cum am reușit să demonstrez optimalitatea soluției finale. \par 
-Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date $\textit{Problem}$ astfel:
+Pentru a reprezenta problema pentru care algoritmul trebuie să obțină cel mai bun profit pe setul de intrare, am ales sa definesc un tip de date \textit{Problem} astfel:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{datatype} \PY{n+nc}{Problem} \PY{o}{=} \PY{n}{Problem}\PY{p}{(}\PY{n}{n}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{c}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{gains}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} 
@@ -17,10 +17,10 @@ unde:
     \item câmpul \textit{gains} este o secvență ce memorează profitul fiecărui obiect;
     \item câmpul \textit{weights} este o secvență ce memorează greutatea fiecărui obiect.
 \end{itemize} \par
-Folosind cuvântul cheie \formatText{datatype} am definit un nou tip de date inductiv numit $\textit{Problem}$ cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă.
+Folosind cuvântul cheie \formatText{datatype} am definit un nou tip de date inductiv numit \textit{Problem} cu un singur constructor având același nume în care câmpurile sunt separate prin virgulă.
 \par
 Atât profitul, cât și greutatea fiecărui obiect pot fi accesate prin indicele corespunzător poziției din secvență. Spre exemplu, pentru a accesa greutatea celui de-al doilea obiect este folosit operatorul de indexare $\textit{weights}[1]$, deoarece indexarea celor două secvențe începe de la 0. În dafny, o \textbf{secvență} este o colecție de elemente de același tip, iar în cazul acesta, de numere întregi.  \par
-Orice instanța a problemei oferită la intrare trebuie să fie validă și să respecte anumite condiții pentru ca algoritmul să poată produce o soluție corectă. Pentru a mă asigura că aceste condiții sunt îndeplinite a fost nevoie să formulez un predicat. \textbf{Predicatele} în Dafny sunt funcții ale călor rezultate sunt valori boolene. \cite{leino2021dafny} Acestea sunt folosite pentru a evalua proprietăți care de obicei trebuie să fie adevărate și de aceea ele ajută în procesul de verificare al corectitudinii. Astfel, am definit predicatul \formatText{isValidProblem} care verifică dacă avem cel puțin un obiect la dispoziție și un rucsac de capacitate mai mare decât zero, dacă știm greutatea și câștigul fiecărui obiect, iar acestea au valori pozitive diferite de zero:
+Orice instanța a problemei oferită la intrare trebuie să fie validă și să respecte anumite condiții pentru ca algoritmul să poată produce o soluție corectă. Pentru a mă asigura că aceste condiții sunt îndeplinite a fost nevoie să formulez un predicat. \textbf{Predicatele} în Dafny sunt funcții ale călor rezultate sunt valori boolene \cite{leino2021dafny}. Acestea sunt folosite pentru a evalua proprietăți care de obicei trebuie să fie adevărate și de aceea ele ajută în procesul de verificare al corectitudinii. Astfel, am definit predicatul \formatText{isValidProblem} care verifică dacă avem cel puțin un obiect la dispoziție și un rucsac de capacitate mai mare decât zero, dacă știm greutatea și câștigul fiecărui obiect, iar acestea au valori pozitive diferite de zero:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -36,7 +36,7 @@ Orice instanța a problemei oferită la intrare trebuie să fie validă și să 
   \PY{k}{forall} \PY{n}{i} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{arr}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} \PY{n}{arr}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{0}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    și este folosit, după cum sugerează și numele acestuia, pentru a verifica dacă toate elementele unei secvențe precum $\textit{gains}$ sunt pozitive. \\ \par 
+    și este folosit, după cum sugerează și numele acestuia, pentru a verifica dacă toate elementele unei secvențe precum \textit{gains} sunt pozitive. \\ \par 
 
 Datele de ieșire sunt reprezentate astfel:
 \begin{Verbatim}[commandchars=\\\{\}]

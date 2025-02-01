@@ -58,7 +58,7 @@
 \end{enumerate}
 
 \section{Funcții}
-În Dafny, \textbf{funcțiile} pot fi interpretate ca funcții matematice în care corpul funcției reprezintă definiția acesteia, motiv pentru care de obicei, funcțiile nu necesită postcondiții. \cite{DBLP:series/natosec/KoenigL12} Acestea sunt folosite pentru a returna un rezultat la ieșire al cărui tip este specificat în semnătura funcției, imediat după lista de parametri. \par 
+În Dafny, \textbf{funcțiile} pot fi interpretate ca funcții matematice în care corpul funcției reprezintă definiția acesteia, motiv pentru care de obicei, funcțiile nu necesită postcondiții \cite{DBLP:series/natosec/KoenigL12}. Acestea sunt folosite pentru a returna un rezultat la ieșire al cărui tip este specificat în semnătura funcției, imediat după lista de parametri. \par 
 Funcțiile importante pe care le-am implementat și care au fost necesare în demonstrație sunt:
 \begin{enumerate}
     \item Funcția \formatText{gain}:
@@ -88,7 +88,7 @@ Funcțiile importante pe care le-am implementat și care au fost necesare în de
   \PY{n}{solution}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{*} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{+} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    Spre deosebire de \textit{gain}, poate primi o subsoluție al cărui profit se dorește a fi calculat prin specificarea unui index $i$ reprezentând poziția de la final spre început a subsoluției și are o implementare recursivă a cărei finalitate este asigurată prin condiția $i == 0$. Această funcție oferă o informație în plus care nu reiese direct din definiția funcției, dar este adevărată, mai exact faptul că la finalul execuției rezultatul obținut va fi mereu pozitiv sau egal cu zero. Acest lucru este specificat folosind clauza \texttt{ensures}, iar adnotările de acest gen sunt numite  \formatText{postcondiții}. Ele sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții, metode sau leme. \cite{DBLP:series/natosec/KoenigL12}
+    Spre deosebire de \textit{gain}, poate primi o subsoluție al cărui profit se dorește a fi calculat prin specificarea unui index $i$ reprezentând poziția de la final spre început a subsoluției și are o implementare recursivă a cărei finalitate este asigurată prin condiția $i == 0$. Această funcție oferă o informație în plus care nu reiese direct din definiția funcției, dar este adevărată, mai exact faptul că la finalul execuției rezultatul obținut va fi mereu pozitiv sau egal cu zero. Acest lucru este specificat folosind clauza \texttt{ensures}, iar adnotările de acest gen sunt numite  \formatText{postcondiții}. Ele sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții, metode sau leme \cite{DBLP:series/natosec/KoenigL12}.
     \item Funcția \formatText{weight}, asemănătoare din punct de vedere al implementării cu \textit{gain}, calculează greutatea totală a obiectelor corespunzătoare pozițiilor din soluție ale cărei valoare este 1.
     \item Funcția \formatText{computeWeight}, este asemănătoare din punct de vedere al implementării cu \textit{computeGain}, în schimb ea calculează greutatea unei (sub)soluții. Funcția \textit{weight} apelează această funcție pentru a obține greutatea întregii soluții.
     \item Funcția \formatText{sumAllGains}:

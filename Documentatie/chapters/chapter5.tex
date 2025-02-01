@@ -1,11 +1,9 @@
 \chapter{Leme importante}
 \begin{sloppypar}
 
-\textbf{Lemele} sunt declarații folosite atunci când unele proprietăți logice sunt mult prea complexe pentru Dafny pentru a le putea demonstra singur. \cite{leino2021dafny} Acestea reprezintă un puternic instrument de ghidare al verificatorului în demonstrarea corectitudinii programului. Sunt declarate separat și pot avea, asemănător metodelor, precondiții și postcondiții. Astfel, o lemă va fi demonstrată separat luând în calcul toate posibilitățile aplicabile pentru parametri ce îndeplinesc precondițiile, având ca scop verificarea cu succes a postcondiției \cite{leino2021dafny}, care de altfel reprezintă proprietatea pe care dorim sa o clarificăm pentru Dafny. \par
-Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine care m-au ajutat în demonstrarea corectitudinii și optimalității algoritmului. \par
-\begin{enumerate}
-    \item Lema \formatText{computeGainAllZeros} 
-    \begin{Verbatim}[commandchars=\\\{\}]
+\textbf{Lemele} sunt declarații folosite atunci când unele proprietăți logice sunt mult prea complexe pentru Dafny pentru a le putea demonstra singur \cite{leino2021dafny}. Acestea reprezintă un instrument de ghidare al verificatorului în demonstrarea corectitudinii programului. Sunt declarate separat și pot avea, asemănător metodelor, precondiții și postcondiții. Astfel, o lemă va fi demonstrată separat luând în calcul toate posibilitățile aplicabile pentru parametri ce îndeplinesc precondițiile, având ca scop verificarea cu succes a postcondiției \cite{leino2021dafny}, care de altfel reprezintă proprietatea pe care dorim sa o clarificăm pentru Dafny. \par
+Lema \formatText{computeGainAllZeros} este demonstrată prin inducție și este utilă pentru a arăta că dacă avem o soluție ce conține doar elemente de 0, atunci câștigul unei astfel de soluții nu poate fi decât 0: 
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
   \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|}
@@ -22,9 +20,8 @@ Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    \hspace{2mm} Această lemă este demonstrată prin inducție și folosită pentru a arăta că dacă avem o soluție ce conține doar elemente de 0, atunci câștigul produs de o astfel de soluție nu poate fi decât 0. 
-    \item Lema \formatText{optimalSolCapacity0}
-    \begin{Verbatim}[commandchars=\\\{\}]
+\hspace{4mm} Am folosit această lemă în cadrul unei alte leme numită \formatText{optimalSolCapacity0}, care demonstrează că soluțiile generate pentru subproblemele în care rucsacul nu permite adăugarea niciunui obiect sunt optime. În acest caz, pentru o problemă validă, o soluție parțială doar cu elemente de 0 și de greutate 0 este cea cu cel mai bun profit datorită limitării impuse de către parametrul de capacitate, care este 0:
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolCapacity0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
  \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
@@ -50,57 +47,44 @@ Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine
   \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    este folosită pentru a demonstra că soluțiile generate pentru cazul $j == 0$ sunt într-adevăr optime pentru subproblemele în care rucsacul nu permite adăugarea niciunui obiect. Verificarea corectă a lemei începe încă de la valoarea de adevăr a precondițiilor, deoarece după cum am menționat, lemele sunt verificate separat în funcție de condițiile impuse prin precondiții. Se dorește aici să demonstrăm că pentru o problemă validă, o soluție parțială doar cu elemente de 0 și de greutate 0 este cea care produce cel mai bun profit datorită limitării impuse de către parametrul de capacitate. \par
-    \hspace{2mm} Am folosit un $forall$ $statement$ cu ajutorul căruia am demonstrat că pentru toate soluțiile $s$ care îndeplinesc proprietatea de \textbf{soluție parțială} de lungime $i$, câștigul acestora este cel mult egal cu cel al soluției presupuse a fi optimă. Pentru astfel de soluții am demonstrat că ele nu pot fi altele decât cele care conțin tot doar elemente de 0, iar câștigul acestora este de asemenea 0.
-     \item Lema \formatText{optimalSolRemove1}
-     \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k+kd}{lemma} \PY{n+nf}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
+\hspace{4mm} Am folosit un \textit{forall statement} cu ajutorul căruia am demonstrat că pentru toate soluțiile $s$ care îndeplinesc proprietatea de \textbf{soluție parțială} de lungime $i$, câștigul acestora este cel mult egal cu cel al soluției presupuse a fi optimă. Pentru astfel de soluții am demonstrat că ele nu pot fi altele decât cele care conțin tot doar elemente de 0, iar câștigul acestora este de asemenea 0. 
+O altă lema ce abordează restricții impuse de paramentrul de capacitate este \formatText{optimalSolAdd0TooBig}:
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0TooBig}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
     \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
  \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
- \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
- \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
- \PY{k}{requires} \PY{n}{solution}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
- \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
-    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} 
+    \PY{o}{|}\PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j} 
+ \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{n}{j}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
 \PY{p}{\PYZob{}}
-  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-  \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
-  \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
-    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
-    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{p}{\PYZob{}}
-    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
-    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
-        \PY{n}{x}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
-    \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{s} \PY{o}{==} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{x} \PY{o}{==} \PY{n}{x1}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{x1}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} 
-        \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+  \PY{n}{weightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}  
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
     \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
+    \PY{n}{computeWeightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
     \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-     După cum am menționat anterior, una dintre proprietățile caracteristice programării dinamice este proprietatea de \textbf{substructură optimă}, care constă în ideea că soluția optimă a unei probleme poate fi construită din soluțiile optime ale subproblemelor acesteia. Această lemă se dorește \todo{de evitat diateza pasiva} a demonstra tocmai această proprietate, dar în sens invers: având o soluție optimă $solution$ pentru subproblema ($i, j$) 
-     \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
-\end{Verbatim}
-     trebuie să demonstrăm că dacă din acestă soluție vom extrage ultimul obiect adăugat atunci vom obține o soluție optimă pentru o subproblemă cu ce nu include acest obiect și capacitatea rămasă a rucsacului după eliminarea greutății corespunzătoare obiectului:
-     \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
-        \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-    \hspace{2mm} Pentru a putea demonstra această lemă, am început prin a presupune că soluția rămasă după eliminarea obiectului nu este optimă pentru subproblema ($i - 1, j - p.weights[i - 1]$), dar că există o presupusă soluție $x$ ce aduce un profit optim pentru aceasta   . Dar dacă pentru această soluție am adăuga obiectul $i$, am obține o soluție de lungime $i$ cu un profit mai bun decât $solution$, ceea ce contrazice precondiția lemei, deci este presupunerea făcută la început este falsă.
-     \item Lema \formatText{optimalSolAdd1}
-     \begin{Verbatim}[commandchars=\\\{\}]
+\hspace{4mm} Aceasta este utilă când trebuie să demonstrez că soluția optimă pentru o subproblemă $(i, j)$ nu include obiectul $i$ dacă greutatea acestuia este mai mare decât capacitatea $j$. Această lemă este demonstrată prin reducere la absurd, iar optimalitatea unei astfel de soluții este arătată prin contrazicerea precondiției ce garantează existența unei soluții optime pentru $(i - 1, j)$. \par
+O lemă foarte importantă în cadrul acestei lucrări este \formatText{optimalSolAdd1}, pe care o folosesc pentru a demonstra că adăugarea obiectului $i$ în rucsac produce o soluție optimă pentru o subproblemă $(i, j)$ ce respectă anumite proprietăți specificate prin precondiții:
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
     \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -145,34 +129,9 @@ Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-     este formulată pentru cazul în care trebuie să demonstrăm că adăugarea unui obiect produce o soluție parțială care este optimă pentru subproblema ($i, j$), iar pentru a demonstra acest lucru am folosit metoda reducerii la absurd astfel: având două soluții optime $solution1$ și $solution2$ pentru subproblemele ($i - 1, j - p.weights[i - 1]$) și ($i - 1, j$), vom construi noua soluție adăugând un element de 1 în $solution1$ (soluția de lungime $i - 1$ ce corespunde capacității rămase după includerea obiectului). Presupunând că soluția rezultată nu este optimă pentru subproblema ($i, j$), înseamnă că există o soluție $x$ ce produce un profit mai bun. \par 
-     \hspace{2mm} Trebuie să considerăm două cazuri pentru soluția $x$: 
-     \begin{itemize}
-         \item Nu conține obiectul i, deci înseamnă că profitul lui $x$ este cel mult egal cu profitul adus de soluția subproblemei anterioare ($i - 1, j$), însă știind din precondițiile 
-         \begin{Verbatim}[commandchars=\\\{\}]
-\PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profit1} \PY{o}{\PYZgt{}} \PY{n}{profit2}
-\PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{o}{|}\PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
-\end{Verbatim}
-         că adăugând câștigul obiectului curent obținem un profit mult mai bun și nu depășim capacitatea $j$, ajungem la o contradicție, deci obiectul aparține soluției $x$.
-         \item Conține obiectul i, iar pentru a demonstra că profitul soluției propuse este cel puțin la fel de bun ca profitul soluției $x$, trebuie să demonstrăm că și profiturile subsoluțiilor din care extragem obiectul $i$ sunt egale:
-         \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{n}{by} \PY{p}{\PYZob{}} 
-  \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-  \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
-  \PY{k}{assert} \PY{n}{x} \PY{o}{==} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-  \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution1}\PY{p}{)} \PY{n}{by}
-  \PY{p}{\PYZob{}}
-    \PY{n}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}
-            \PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
-  \PY{p}{\PYZcb{}} 
-\PY{p}{\PYZcb{}}
-\end{Verbatim}
-         Acest lucru este demonstrat folosind proprietatea de substructură optimă despre care am vorbit în cadrul lemei \formatText{optimalSolRemove1}.
-     \end{itemize}
-     Astfel am demonstrat că adăugarea obiectului curent aduce un profit la fel de bun ca cel al unei soluții presupuse optime $x$, deci soluția propusă este și ea optimă.
-     \item Lema \formatText{optimalSolAdd0}
-     \begin{Verbatim}[commandchars=\\\{\}]
+\hspace{4mm} Această lemă a fost demonstrată prin metoda reducerii la absurd, începând prin a presupune că dacă soluția propusă nu este optimă, înseamnă că există o soluție $x$ ce produce un profit mai bun. Pentru a demonstra că profitul soluției propuse este cel puțin la fel de bun ca profitul soluției $x$, am arătat că și profiturile subsoluțiilor din care extragem obiectul $i$ sunt egale, iar în acest fel am putut evidenția proprietatea de substructură optimă din cadrul acestei probleme. Astfel am demonstrat că adăugarea obiectului curent aduce un profit la fel de bun ca cel al unei soluții presupuse optime $x$, deci soluția propusă este și ea optimă. \par
+O altă lemă similară din punct de vedere al demonstrației, dar care tratează optimalitatea soluției pentru care adăugarea obiectului nu produce un profit mai bun este \formatText{optimalSolAdd0}. Această lemă este demonstrată, de asemenea, folosind proprietatea de substructură optimă și analizând modificările aduse asupra profitului și greutății soluțiilor prin adăugarea sau eliminarea unui element de 0 sau 1:
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
     \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -213,44 +172,45 @@ Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-     Demonstrația lemei este similară cu cea pentru \formatText{optimalSolAdd1}, pornind prin a presupune că ipoteza ințială este falsă \todo{prin reducere la absurd}, deci există o soluție $x$ ce produce un profit mai bun. Trebuie să considerăm apartenența obiectului în $x$, iar în ambele cazuri vom folosi proprietatea de substructră optimă pentru a demonstra că soluția propusă are un profit cel mult la fel de bun ca $x$, deci adăugarea obiectului nu produce un profit mai bun pentru acestă subproblemă.
-     \item Lema \formatText{optimalSolAdd0TooBig}
-     \begin{Verbatim}[commandchars=\\\{\}]
-\PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0TooBig}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
+\hspace{4mm} Lemele \formatText{optimalSolRemove1} și \formatText{optimalSolRemove0} sunt similare în demonstrație și enunță proprietatea de substructură optimă necesară pentru verificarea lemelor prezentate anterior. Lema \formatText{optimalSolRemove1} demonstrează că având o soluție optimă pentru o subproblemă $(i, j)$ ce include obiectul $i$, atunci prin extragerea acestuia obținem o soluție optimă pentru subproblema $(i - 1, j - \textit{p.weights}[i - 1])$ ce consideră primele $i - 1$ obiecte și o capacitate ce rămâne după eliminarea greutății obiectului $i$:
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kd}{lemma} \PY{n+nf}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
     \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
  \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
- \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
- \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}
- \PY{k}{requires} \PY{n}{computeWeight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} 
-    \PY{o}{|}\PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j} 
- \PY{k}{requires} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{n}{j}
- \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
+ \PY{k}{requires} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
+ \PY{k}{requires} \PY{n}{solution}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
+ \PY{k}{ensures} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
 \PY{p}{\PYZob{}}
-  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
-  \PY{n}{weightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}
-  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{p}{\PYZob{}}
-    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{n}{gainAddTooBig}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)}\PY{p}{;}  
-    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)}\PY{p}{;}
+  \PY{k+kd}{var} \PY{n}{s} \PY{o}{:=} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+  \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+  \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+  \PY{k}{if} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+    \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
+    \PY{n}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x} \PY{p}{:} \PY{n}{Solution} \PY{p}{:}\PY{o}{|} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} 
+        \PY{n}{x}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{o}{|}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+    \PY{k+kd}{var} \PY{n}{x1} \PY{o}{:=} \PY{n}{x} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{n}{gainAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{n}{weightAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{s} \PY{o}{==} \PY{n}{solution}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{x} \PY{o}{==} \PY{n}{x1}\PY{p}{[}\PY{p}{..}\PY{o}{|}\PY{n}{x1}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+    \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} 
+        \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{)} \PY{o}{+} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
     \PY{k}{assert} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{x}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{;}
-    \PY{n}{computeWeightAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{,} \PY{o}{|}\PY{n}{x}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x}\PY{p}{)} \PY{o}{==} \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{n}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{x1}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
-    \PY{k}{assert} \PY{err}{!}\PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{,} \PY{n}{j}\PY{p}{)}\PY{p}{;}
     \PY{k}{assert} \PY{k+kc}{false}\PY{p}{;}
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-     Este o altă lemă demonstrată folosind reducerea la absurd, de această dată pentru cazul în care greutatea obiectului depășește capacitatea $j$. Pornind de la premiza că dacă adăugând un 0 soluției corespunzătoare subproblemei anterioare pentru acceași capacitate ($solution + [0]$) nu este optimă pentru subproblema curentă ($i, j$), înseamnă că există o altă soluție mai bună. Pentru a demonstra optimalitatea soluției a fost nevoie să arăt că eliminând ultimul element (corespunzător obiectului $i$) se ajunge la contrazicerea precondiției ce ne garantează că avem o soluție optimă pentru ($i - 1, j$).
-     \item Lema \formatText{existsOptimalPartialSol}
-     \begin{Verbatim}[commandchars=\\\{\}]
+\hspace{4mm}În lemele prezentate anterior, folosite pentru a demonstra optimalitatea soluțiilor, a fost necesară presupunerea că avem la îndemână o altă soluție optimă pentru subproblema $(i, j)$ pe care încercăm să o rezolvăm. Pentru a exprima faptul că există o astfel de soluție, am folosit cuantificatorul existențial \textit{exists} în cadrul unei instrucțiuni \texttt{assert}, însă Dafny deși acoperă destul de multe cazuri de unul singur, de multe ori întâlnește probleme de indecidabilitate când acesta este folosit \cite{FAQ}. Astfel, a fost nevoie să formulez o lemă numită \formatText{existsOptimalPartialSol}, ce folosește acest cuantificator și să ghidez verificatorul să demonstreze existența unei soluții optime pentru o subproblemă cu $i$ obiecte și un rucsac de capacitate $j$:
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
  \PY{k}{requires} \PY{l+m+mi}{1} \PY{o}{\PYZlt{}=} \PY{n}{i} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
@@ -290,14 +250,10 @@ Voi prezenta mai departe unele dintre cele mai importante leme formulate de mine
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    După cum am văzut în lemele prezentate anterior, folosite pentru a demonstra optimalitatea soluțiilor, a fost necesară presupunerea că avem la îndemână o altă soluție optimă pentru subproblema ($i, j$) pe care încercăm să o rezolvăm. Pentru a exprima faptul că există o astfel de soluție, am folosit cuantificatorul existențial $exists$, însă Dafny deși acoperă destul de multe cazuri de unul singur, de multe ori întâlnește probleme de indecidabilitate când acesta este folosit. \cite{FAQ} Astfel, a fost nevoie să formulez o lemă ce folosește acest cuantificator și să ghidez verificatorul să demonstreze existența unei soluții optime pentru o subproblemă cu $i$ obiecte și un rucsac de capacitate $j$. \par
-    \hspace{2mm} Pentru a demonstra acest lucru vom presupuse prin reducere la absurd că nu există o soluție optimă pentru subproblema ($i, j$), ceea ce  înseamnă că pentru orice soluție va exista mereu una cu un profit mai mare. Pentru a itera prin soluțiile posibile am folosit o buclă $while$, iar invarianții sunt cei care asigură verificatorul că la fiecare iterație va exista o soluție cu un profit mai bun decât cea curentă. După un număr finit de pași, vom ajunge la o soluție ce are un profit mai mare decât valoarea tuturor obiectelor, lucru care nu este posibil, deci ipoteza
-    \begin{Verbatim}[commandchars=\\\{\}]
+\hspace{4mm} Pentru a demonstra acest lucru vom presupune prin reducere la absurd că nu există o soluție optimă pentru subproblema $(i, j)$, ceea ce  înseamnă că pentru orice soluție va exista mereu una cu un profit mai mare. Pentru a itera prin soluțiile posibile am folosit o buclă \textit{while}, iar invarianții sunt cei care asigură verificatorul că la fiecare iterație va exista o soluție cu un profit mai bun decât cea curentă. După un număr finit de pași, vom ajunge la o soluție ce are un profit mai mare decât valoarea tuturor obiectelor, lucru care nu este posibil, deci ipoteza
+\begin{Verbatim}[commandchars=\\\{\}]
 \PY{err}{!}\PY{n}{exists} \PY{n}{s} \PY{p}{::} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
 \end{Verbatim}
-    de la care am plecat este falsă, iar postcondiția este verificată cu succes.
-\end{enumerate}
-
-\todo{Ar putea fi grupate lemele. De exemplu, multe dintre ele spun ce se intampla cu gain si cu weight cand adaugam 0/1. Lema cu exista e separata. La fiecare lema ar trebui explicat unde e utila (gruparea va poate ajuta in acest sens).}
+de la care am plecat este falsă, iar postcondiția este verificată cu succes.
 
 \end{sloppypar}

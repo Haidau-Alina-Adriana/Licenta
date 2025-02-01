@@ -20,8 +20,8 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
 
-\par Cuvântul cheie \texttt{ghost} este folosit pentru a marca faptul că acest predicat este folosit doar în partea de verificare și nu este inclus în codul executabil. \cite{leino2021dafny}
-\par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea. \cite{DBLP:series/natosec/KoenigL12} Sunt esențiale pentru Dafny deoarece dacă acestea nu sunt satisfăcute la momentul apelului, atunci nu mai există nicio garanție privind comportamenul corect al programului.
+\par Cuvântul cheie \texttt{ghost} este folosit pentru a marca faptul că acest predicat este folosit doar în partea de verificare și nu este inclus în codul executabil \cite{leino2021dafny}.
+\par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea \cite{DBLP:series/natosec/KoenigL12}. Sunt esențiale pentru Dafny deoarece dacă acestea nu sunt satisfăcute la momentul apelului, atunci nu mai există nicio garanție privind comportamenul corect al programului.
 
 \par O \formatText{soluție parțială} este o secvență binară de o lungime variabilă care nu depășește numărul de obiecte și care respectă constrângerea legată de capacitatea rucsacului. Predicatul formulat pentru a confirma o astfel de soluție este \formatText{isPartialSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
