@@ -796,7 +796,8 @@ method solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
   ensures |partialProfits| == p.c + 1
   ensures |partialSolutions| == p.c + 1
   ensures forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
-  ensures forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
+  ensures forall k :: 0 <= k < |partialSolutions| ==> (isValidPartialSolution(p, partialSolutions[k]) 
+                                                && gain(p, partialSolutions[k]) == partialProfits[k])
 {
         partialProfits := [];
         var j := 0;
@@ -820,7 +821,7 @@ method solves0Objects(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<se
         }
 }
 
-method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq<seq<int>>>, i: int) 
+method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions: seq<seq<seq<int>>>, i: int) 
                             returns (partialProfits: seq<int>, partialSolutions: seq<seq<int>>)
   requires isValidProblem(p)
   requires 0 < i < p.n + 1
@@ -829,13 +830,15 @@ method getPartialProfits(p: Problem, profits: seq<seq<int>>, solutions : seq<seq
   requires forall k :: 0 <= k < i ==> |profits[k]| == p.c + 1
   requires forall k :: 0 <= k < i ==> |solutions[k]| == p.c + 1
   requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> isOptimalPartialSolution(p, solutions[k][q], k, q) 
-  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> gain(p, solutions[k][q]) == profits[k][q]
+  requires forall k :: 0 <= k < |solutions| ==> forall q :: 0 <= q < |solutions[k]| ==> 
+                                      isValidPartialSolution(p, solutions[k][q]) && gain(p, solutions[k][q]) == profits[k][q]
 
   ensures p.c + 1 == |partialSolutions| == |partialProfits|
   ensures 0 <= |profits| <= p.n + 1 
 
   ensures forall k :: 0 <= k < |partialSolutions| ==> isOptimalPartialSolution(p, partialSolutions[k], i, k)
-  ensures forall k :: 0 <= k < |partialSolutions| ==> gain(p, partialSolutions[k]) == partialProfits[k]
+  ensures forall k :: 0 <= k < |partialSolutions| ==> (isValidPartialSolution(p, partialSolutions[k]) 
+                              && gain(p, partialSolutions[k]) == partialProfits[k])
 {
         var j := 0;
         partialProfits := [];
