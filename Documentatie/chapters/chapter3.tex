@@ -2,9 +2,9 @@
 \begin{sloppypar}
 
 \section{Predicate}
-    Alte predicate formulate care au fost necesare în puncte diferite ale demonstrației sunt:
+    Alte predicate formulate care au fost necesare în diverse puncte ale demonstrației sunt:
     \begin{enumerate}    
-    \item Predicatul \formatText{isSolution}:
+    \item Predicatul \texttt{isSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -14,7 +14,7 @@
 \PY{p}{\PYZcb{}}
 \end{Verbatim} 
     Acesta verifică dacă avem o soluție validă pentru problema completă.
-    \item Predicatul \formatText{isValidSubproblem}:
+    \item Predicatul \texttt{isValidSubproblem}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidSubproblem}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -22,7 +22,7 @@
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
     Acesta definește o subproblemă a problemei inițiale, excluzând cazurile de bază.
-    \item Predicatul \formatText{areValidPartialSolutions}:
+    \item Predicatul \texttt{areValidPartialSolutions}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{areValidPartialSolutions}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} 
     \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{solutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} 
@@ -37,8 +37,8 @@
     \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    Acesta validează rezultatele obținute doar pentru subproblemele pasului curent, în funcție de modificările aduse datorită creșterii numărului de obiecte disponibile.
-    \item Predicatul \formatText{areValidSolutions}:
+    Acesta validează rezultatele obținute doar pentru subproblemele pasului curent, în funcție de modificările cauzate de creșterea numărului de obiecte disponibile.
+    \item Predicatul \texttt{areValidSolutions}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{areValidSolutions}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} 
     \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{solutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -58,10 +58,10 @@
 \end{enumerate}
 
 \section{Funcții}
-În Dafny, \textbf{funcțiile} pot fi interpretate ca funcții matematice în care corpul funcției reprezintă definiția acesteia, motiv pentru care de obicei, funcțiile nu necesită postcondiții \cite{DBLP:series/natosec/KoenigL12}. Acestea sunt folosite pentru a returna un rezultat la ieșire al cărui tip este specificat în semnătura funcției, imediat după lista de parametri. \par 
+În Dafny, \textbf{funcțiile} nu pot avea efecte secundare și implementează funcții matematice. Corpul funcției reprezintă definiția acesteia, iar de obicei funcțiile nu necesită postcondiții. \cite{leino2021dafny} Acestea returnează un rezultat la ieșire al cărui tip este specificat în semnătura funcției, imediat după lista de parametri. Sunt folosite în special pentru specificații. \par 
 Funcțiile importante pe care le-am implementat și care au fost necesare în demonstrație sunt:
 \begin{enumerate}
-    \item Funcția \formatText{gain}:
+    \item Funcția \texttt{gain}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{function} \PY{n+nf}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}\PY{p}{:} \PY{k+kt}{int}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -72,8 +72,8 @@ Funcțiile importante pe care le-am implementat și care au fost necesare în de
         \PY{k}{else} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    Această funcție calculează profitului corespunzător unei soluții valide și returnează câștigul întregii soluții.
-    \item Funcția \formatText{computeGain}:
+    Această funcție returnează profitului corespunzător unei soluții valide, rezultat calculat de funcția \texttt{computeGain}, sau 0 dacă soluția nu are niciun element.
+    \item Funcția \texttt{computeGain}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{function} \PY{n+nf}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} 
     \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} \PY{p}{:} \PY{k+kt}{int}
@@ -88,10 +88,10 @@ Funcțiile importante pe care le-am implementat și care au fost necesare în de
   \PY{n}{solution}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{*} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{+} \PY{n}{computeGain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{)}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    Spre deosebire de \textit{gain}, poate primi o subsoluție al cărui profit se dorește a fi calculat prin specificarea unui index $i$ reprezentând poziția de la final spre început a subsoluției și are o implementare recursivă a cărei finalitate este asigurată prin condiția $i == 0$. Această funcție oferă o informație în plus care nu reiese direct din definiția funcției, dar este adevărată, mai exact faptul că la finalul execuției rezultatul obținut va fi mereu pozitiv sau egal cu zero. Acest lucru este specificat folosind clauza \texttt{ensures}, iar adnotările de acest gen sunt numite  \formatText{postcondiții}. Ele sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții, metode sau leme \cite{DBLP:series/natosec/KoenigL12}.
-    \item Funcția \formatText{weight}, asemănătoare din punct de vedere al implementării cu \textit{gain}, calculează greutatea totală a obiectelor corespunzătoare pozițiilor din soluție ale cărei valoare este 1.
-    \item Funcția \formatText{computeWeight}, este asemănătoare din punct de vedere al implementării cu \textit{computeGain}, în schimb ea calculează greutatea unei (sub)soluții. Funcția \textit{weight} apelează această funcție pentru a obține greutatea întregii soluții.
-    \item Funcția \formatText{sumAllGains}:
+    Deoarece funcțiile nu au efecte secundare, parcurgerea soluției se face recursiv, iar finalitatea acesteia este asigurată prin condiția $i == 0$. Această funcție oferă o informație în plus care nu reiese direct din definiția funcției, dar este adevărată, mai exact faptul că la finalul execuției rezultatul obținut va fi mereu pozitiv sau egal cu zero. Acest lucru este specificat folosind clauza \texttt{ensures}, iar adnotările de acest gen sunt numite  \textbf{postcondiții}. Ele sunt expresii logice care trebuie să fie adevărate după executarea logicii unei funcții, metode sau leme \cite{DBLP:series/natosec/KoenigL12}.
+    \item Funcția \texttt{weight}, asemănătoare din punct de vedere al implementării cu \texttt{gain}, returnează greutatea totală a obiectelor corespunzătoare unei soluții valide, sau 0 dacă soluția nu conține niciun obiect.
+    \item Funcția \texttt{computeWeight}, este asemănătoare din punct de vedere al implementării cu \texttt{computeGain}, dar aceasta parcurge soluția pentru a calcula greutatea totală a obiectelor corespunzătoare pozițiilor valorilor de 1 din soluție.
+    \item Funcția \texttt{sumAllGains}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{function} \PY{n+nf}{sumAllGains}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} \PY{p}{:} \PY{k+kt}{int}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}

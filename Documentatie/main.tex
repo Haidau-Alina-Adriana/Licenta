@@ -18,10 +18,11 @@
 \usepackage{tabularray}
 \UseTblrLibrary{booktabs}
 \usepackage{fancyvrb}
+\usepackage{minted}
 \usepackage{color}
 \usepackage{upquote,textcomp}
 \usepackage{url}
-\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{hyperref}
 
 
 % includes options
@@ -79,6 +80,9 @@ colback=white
         \end{tblr}
     \end{table}
 }
+\usepackage[romanian]{babel}
+
+
 
 \definecolor{colone}{RGB}{209,220,204}
 \definecolor{coltwo}{RGB}{204,222,210}
@@ -233,4 +237,6 @@ colback=white
     \input{chapters/conclusions}
     \bibliography{chapters/references} 
     \bibliographystyle{ieeetr}
+
+    \input{chapters/sourcecode}
 \end{document}

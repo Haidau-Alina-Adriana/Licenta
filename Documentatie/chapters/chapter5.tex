@@ -1,8 +1,10 @@
 \chapter{Leme importante}
 \begin{sloppypar}
 
-\textbf{Lemele} sunt declarații folosite atunci când unele proprietăți logice sunt mult prea complexe pentru Dafny pentru a le putea demonstra singur \cite{leino2021dafny}. Acestea reprezintă un instrument de ghidare al verificatorului în demonstrarea corectitudinii programului. Sunt declarate separat și pot avea, asemănător metodelor, precondiții și postcondiții. Astfel, o lemă va fi demonstrată separat luând în calcul toate posibilitățile aplicabile pentru parametri ce îndeplinesc precondițiile, având ca scop verificarea cu succes a postcondiției \cite{leino2021dafny}, care de altfel reprezintă proprietatea pe care dorim sa o clarificăm pentru Dafny. \par
-Lema \formatText{computeGainAllZeros} este demonstrată prin inducție și este utilă pentru a arăta că dacă avem o soluție ce conține doar elemente de 0, atunci câștigul unei astfel de soluții nu poate fi decât 0: 
+\textbf{Lemele} sunt declarații folosite atunci când unele proprietăți logice nu pot fi demonstrate automat de sistemul Dafny \cite{leino2021dafny}. Acestea reprezintă un instrument de ghidare al verificatorului în demonstrarea corectitudinii programului. Sunt declarate separat și pot avea, asemănător metodelor, precondiții și postcondiții. Astfel, o lemă va fi demonstrată separat luând în calcul toate posibilitățile aplicabile pentru parametri ce îndeplinesc precondițiile, având ca scop verificarea cu succes a postcondiției \cite{leino2021dafny}, ce reprezintă proprietatea pe care vrem să o demonstrăm. \par
+În acest capitol voi prezenta cele mai importante leme pe care le-am folosit.
+\par
+Lema \texttt{computeGainAllZeros} este demonstrată prin inducție și este utilă pentru a arăta că dacă avem o soluție ce conține doar elemente de 0, atunci câștigul unei astfel de soluții nu poate fi decât 0: 
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{computeGainAllZeros}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -20,7 +22,7 @@ Lema \formatText{computeGainAllZeros} este demonstrată prin inducție și este 
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm} Am folosit această lemă în cadrul unei alte leme numită \formatText{optimalSolCapacity0}, care demonstrează că soluțiile generate pentru subproblemele în care rucsacul nu permite adăugarea niciunui obiect sunt optime. În acest caz, pentru o problemă validă, o soluție parțială doar cu elemente de 0 și de greutate 0 este cea cu cel mai bun profit datorită limitării impuse de către parametrul de capacitate, care este 0:
+\hspace{4mm} Am folosit această lemă în cadrul unei alte leme numită \texttt{optimalSolCapacity0}, care demonstrează că soluțiile calculate de metoda \texttt{solvesCapacity0} pentru subproblemele în care rucsacul nu permite adăugarea niciunui obiect sunt optime. În acest caz, pentru o problemă validă, o soluție parțială care conține doar valori de 0 este cea cu cel mai bun profit, din cauza limitării impuse de către parametrul de capacitate, care este 0:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolCapacity0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -47,8 +49,8 @@ Lema \formatText{computeGainAllZeros} este demonstrată prin inducție și este 
   \PY{k}{assert} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm} Am folosit un \textit{forall statement} cu ajutorul căruia am demonstrat că pentru toate soluțiile $s$ care îndeplinesc proprietatea de \textbf{soluție parțială} de lungime $i$, câștigul acestora este cel mult egal cu cel al soluției presupuse a fi optimă. Pentru astfel de soluții am demonstrat că ele nu pot fi altele decât cele care conțin tot doar elemente de 0, iar câștigul acestora este de asemenea 0. 
-O altă lema ce abordează restricții impuse de paramentrul de capacitate este \formatText{optimalSolAdd0TooBig}:
+\hspace{4mm} Am folosit un \texttt{forall statement} cu ajutorul căruia am demonstrat că pentru toate soluțiile $s$ care îndeplinesc proprietatea de \textbf{soluție parțială} de lungime $i$, câștigul acestora este cel mult egal cu cel al soluției presupusă a fi optimă. Pentru astfel de soluții am demonstrat că ele nu pot fi altele decât cele care conțin tot doar elemente de 0, iar câștigul acestora este de asemenea 0. \par
+O altă lema ce abordează restricții impuse de paramentrul de capacitate este \texttt{optimalSolAdd0TooBig}:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0TooBig}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
     \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -83,7 +85,7 @@ O altă lema ce abordează restricții impuse de paramentrul de capacitate este 
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
 \hspace{4mm} Aceasta este utilă când trebuie să demonstrez că soluția optimă pentru o subproblemă $(i, j)$ nu include obiectul $i$ dacă greutatea acestuia este mai mare decât capacitatea $j$. Această lemă este demonstrată prin reducere la absurd, iar optimalitatea unei astfel de soluții este arătată prin contrazicerea precondiției ce garantează existența unei soluții optime pentru $(i - 1, j)$. \par
-O lemă foarte importantă în cadrul acestei lucrări este \formatText{optimalSolAdd1}, pe care o folosesc pentru a demonstra că adăugarea obiectului $i$ în rucsac produce o soluție optimă pentru o subproblemă $(i, j)$ ce respectă anumite proprietăți specificate prin precondiții:
+O lemă foarte importantă în cadrul acestei lucrări este \texttt{optimalSolAdd1}, pe care o folosesc pentru a demonstra că adăugarea obiectului $i$ în rucsac produce o soluție optimă pentru o subproblemă $(i, j)$ ce respectă proprietățile specificate prin precondiții:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
     \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -129,8 +131,8 @@ O lemă foarte importantă în cadrul acestei lucrări este \formatText{optimalS
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm} Această lemă a fost demonstrată prin metoda reducerii la absurd, începând prin a presupune că dacă soluția propusă nu este optimă, înseamnă că există o soluție $x$ ce produce un profit mai bun. Pentru a demonstra că profitul soluției propuse este cel puțin la fel de bun ca profitul soluției $x$, am arătat că și profiturile subsoluțiilor din care extragem obiectul $i$ sunt egale, iar în acest fel am putut evidenția proprietatea de substructură optimă din cadrul acestei probleme. Astfel am demonstrat că adăugarea obiectului curent aduce un profit la fel de bun ca cel al unei soluții presupuse optime $x$, deci soluția propusă este și ea optimă. \par
-O altă lemă similară din punct de vedere al demonstrației, dar care tratează optimalitatea soluției pentru care adăugarea obiectului nu produce un profit mai bun este \formatText{optimalSolAdd0}. Această lemă este demonstrată, de asemenea, folosind proprietatea de substructură optimă și analizând modificările aduse asupra profitului și greutății soluțiilor prin adăugarea sau eliminarea unui element de 0 sau 1:
+\hspace{4mm} Pentru a demonstra această lemă, am folosit metoda reducerii la absurd și am presupus că soluția calculată nu este optimă, prin urmare există o soluție $x$ cu un profit mai bun. Pentru a demonstra că profitul soluției propuse este cel puțin la fel de bun ca profitul soluției $x$, am arătat că și profiturile subsoluțiilor din care extragem obiectul $i$ sunt egale, iar în acest fel am putut evidenția proprietatea de substructură optimă din cadrul acestei probleme. Astfel am demonstrat că adăugarea obiectului curent aduce un profit la fel de bun ca cel al unei soluții presupuse optime $x$, deci soluția propusă este și ea optimă pentru subproblema curentă. \par
+O altă lemă similară din punct de vedere al demonstrației, dar care tratează optimalitatea soluției pentru care adăugarea obiectului nu produce un profit mai bun, este \texttt{optimalSolAdd0}. Această lemă este demonstrată, de asemenea, folosind proprietatea de substructură optimă și analizând modificările aduse asupra profitului și greutății soluțiilor prin adăugarea sau eliminarea unui element de 0 sau 1:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolAdd0}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profit1}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{profit2}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} 
     \PY{n}{solution1}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{solution2}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -172,7 +174,7 @@ O altă lemă similară din punct de vedere al demonstrației, dar care trateaz�
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm} Lemele \formatText{optimalSolRemove1} și \formatText{optimalSolRemove0} sunt similare în demonstrație și enunță proprietatea de substructură optimă necesară pentru verificarea lemelor prezentate anterior. Lema \formatText{optimalSolRemove1} demonstrează că având o soluție optimă pentru o subproblemă $(i, j)$ ce include obiectul $i$, atunci prin extragerea acestuia obținem o soluție optimă pentru subproblema $(i - 1, j - \textit{p.weights}[i - 1])$ ce consideră primele $i - 1$ obiecte și o capacitate ce rămâne după eliminarea greutății obiectului $i$:
+\hspace{4mm} Lemele \texttt{optimalSolRemove1} și \texttt{optimalSolRemove0} sunt similare în demonstrație și enunță proprietatea de substructură optimă necesară pentru verificarea lemelor prezentate anterior. Lema \texttt{optimalSolRemove1} demonstrează că având o soluție optimă pentru o subproblemă $(i, j)$ ce include obiectul $i$, atunci prin extragerea acestuia obținem o soluție optimă pentru subproblema $(i - 1, j - \texttt{p.weights}[i - 1])$, ce consideră primele $i - 1$ obiecte și o capacitate ce rămâne după eliminarea greutății obiectului $i$:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{optimalSolRemove1}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
     \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -209,7 +211,7 @@ O altă lemă similară din punct de vedere al demonstrației, dar care trateaz�
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm}În lemele prezentate anterior, folosite pentru a demonstra optimalitatea soluțiilor, a fost necesară presupunerea că avem la îndemână o altă soluție optimă pentru subproblema $(i, j)$ pe care încercăm să o rezolvăm. Pentru a exprima faptul că există o astfel de soluție, am folosit cuantificatorul existențial \textit{exists} în cadrul unei instrucțiuni \texttt{assert}, însă Dafny deși acoperă destul de multe cazuri de unul singur, de multe ori întâlnește probleme de indecidabilitate când acesta este folosit \cite{FAQ}. Astfel, a fost nevoie să formulez o lemă numită \formatText{existsOptimalPartialSol}, ce folosește acest cuantificator și să ghidez verificatorul să demonstreze existența unei soluții optime pentru o subproblemă cu $i$ obiecte și un rucsac de capacitate $j$:
+\hspace{4mm}În lemele prezentate anterior, folosite pentru a demonstra optimalitatea soluțiilor, a fost necesară presupunerea că avem la îndemână o altă soluție optimă pentru subproblema $(i, j)$ pe care încercăm să o rezolvăm. Pentru a exprima faptul că există o astfel de soluție, am folosit cuantificatorul existențial \texttt{exists} în cadrul unei instrucțiuni \texttt{assert}, însă sistemul Dafny nu poate demonstra automat această proprietate \cite{FAQ}. Astfel, a fost nevoie să formulez o lemă numită \texttt{existsOptimalPartialSol}, ce folosește acest cuantificator și să ghidez verificatorul să demonstreze existența unei soluții optime pentru o subproblemă cu $i$ obiecte și un rucsac de capacitate $j$:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{lemma} \PY{n+nf}{existsOptimalPartialSol}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
  \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -250,10 +252,10 @@ O altă lemă similară din punct de vedere al demonstrației, dar care trateaz�
   \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\hspace{4mm} Pentru a demonstra acest lucru vom presupune prin reducere la absurd că nu există o soluție optimă pentru subproblema $(i, j)$, ceea ce  înseamnă că pentru orice soluție va exista mereu una cu un profit mai mare. Pentru a itera prin soluțiile posibile am folosit o buclă \textit{while}, iar invarianții sunt cei care asigură verificatorul că la fiecare iterație va exista o soluție cu un profit mai bun decât cea curentă. După un număr finit de pași, vom ajunge la o soluție ce are un profit mai mare decât valoarea tuturor obiectelor, lucru care nu este posibil, deci ipoteza
+\hspace{4mm} Pentru a demonstra acest lucru am presupus prin reducere la absurd că nu există o soluție optimă pentru subproblema $(i, j)$, ceea ce  înseamnă că pentru orice soluție există alta cu un profit mai mare. Pentru a itera prin soluțiile posibile am folosit o buclă \texttt{while}, iar invarianții sunt cei care asigură verificatorul că la fiecare iterație va exista o soluție cu un profit mai bun decât cea curentă. După un număr finit de pași, vom ajunge la o soluție ce are un profit mai mare decât valoarea tuturor obiectelor, lucru care nu este posibil, deci presupunerea
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{err}{!}\PY{n}{exists} \PY{n}{s} \PY{p}{::} \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{s}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{j}\PY{p}{)}
 \end{Verbatim}
-de la care am plecat este falsă, iar postcondiția este verificată cu succes.
+pe care am făcut-o este falsă, iar postcondiția este verificată cu succes.
 
 \end{sloppypar}

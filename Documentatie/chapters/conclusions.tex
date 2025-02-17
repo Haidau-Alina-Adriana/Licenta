@@ -3,9 +3,32 @@
 
 \begin{sloppypar}
 
-În cadrul acestei lucrări am implementat și demonstrat corectitudinea unui algoritm  bazat pe tehnica programării dinamice ce rezolvă varianta discretă a problemei rucsacului folosind Dafny, un limbaj de programare dezvoltat pentru verificarea formală a programelor. De asemenea, cu ajutorul lui Dafny am reușit nu doar să demonstrez corectitudinea algoritmului, dar și faptul că acesta construiește la fiecare pas cea mai bună soluție pentru dimensiunea curentă a problemei și resursele disponibile, garantând că soluția finală este cea optimă global. \par
-Pe parcursul procesului de dezvoltare am aprofundat modul în care lucrează algoritmul și am înțeles mai bine cum sunt construite soluțiile parțiale. De asemenea, am dobândit o înțelegere mai detaliată asupra limbajului Dafny, în special a modului în care trebuie să definesc specificațiile și constrângerile unei probleme. O dificultate semnificativă pe care am întâmpinat-o a fost formularea și verificarea lemelor pentru care de foarte multe ori am obținut timeout-uri datorită complexității acestora sau a anumitor precondiții lipsă. \par
-Pe baza acestei lucrări consider că sunt deschise oportunități spre  îmbunătațire, de exemplu prin optimizarea modului în care sunt memorate soluțiile parțiale. În implementarea curentă este utilizată o întreagă matrice pentru stocarea soluțiilor, însă acest lucru poate fi îmbunătățit prin utilizarea unui vector ce înlocuiește această matrice, deoarece pentru a rezolva fiecare subproblemă în care avem disponibile primele $i$ obiecte avem nevoie doar de soluțiile subproblemelor ce consideră primele $i - 1$ obiecte. \par
-De asemenea, ar fi foarte interesant să realizez o comparație între implementarea algoritmului în Dafny și alte implementări în diferite limbaje de verificare formală.
-
+În cadrul acestei lucrări am implementat și demonstrat corectitudinea unui algoritm  bazat pe tehnica programării dinamice ce rezolvă varianta discretă a problemei rucsacului folosind Dafny, un limbaj de programare dezvoltat pentru verificarea formală a programelor. De asemenea, cu ajutorul sistemului Dafny, am reușit nu doar să demonstrez corectitudinea algoritmului, dar și faptul că acesta construiește la fiecare pas cea mai bună soluție pentru dimensiunea curentă a problemei și resursele disponibile, garantând că soluția finală este cea optimă global. \par
+Sinteza elementelor din cadrul acestei implementări este următoarea:
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c@{\hspace{5cm}}c|}
+    \hline
+    \textbf{Elemente} & \textbf{Număr} \\
+    \hline \hline
+    Linii de cod & 1013 \\
+    Comentarii & 24 \\
+    Tipuri de date declarate & 1 \\
+    Sinonime ale tipurilor de date & 1 \\
+    Funcții & 5 \\
+    Predicate & 11 \\
+    Leme & 26 \\
+    Metode & 8 \\
+    Assert-uri & 115 \\
+    Precondiții & 201 \\
+    Postcondiții & 50 \\
+    Invarianți & 26 \\
+    \hline
+\end{tabular}
+\end{table} \par 
+Pe parcursul procesului de dezvoltare am aprofundat modul în care lucrează algoritmul și am înțeles mai bine cum sunt construite soluțiile parțiale. De asemenea, am dobândit o înțelegere mai detaliată asupra limbajului Dafny, în special a modului în care trebuie să definesc specificațiile și constrângerile unei probleme. O dificultate semnificativă pe care am întâmpinat-o a fost formularea și verificarea lemelor pentru care de foarte multe ori am obținut \emph{timeout-uri} datorită complexității acestora sau a anumitor precondiții lipsă. \par
+Pe baza acestei lucrări consider că sunt deschise oportunități spre  îmbunătațire, de exemplu, prin optimizarea modului în care sunt memorate soluțiile parțiale. În implementarea curentă este utilizată o întreagă matrice pentru stocarea soluțiilor, însă acest lucru poate fi îmbunătățit prin utilizarea unui vector ce înlocuiește această matrice, deoarece pentru a rezolva fiecare subproblemă în care avem disponibile primele $i$ obiecte avem nevoie doar de soluțiile subproblemelor ce consideră primele $i - 1$ obiecte. \par
+De asemenea, ar fi foarte interesant să realizez o comparație între implementarea algoritmului în Dafny și alte implementări în diferite limbaje de verificare formală. \par
+Această implementare poate fi utilă pentru cei care au nevoie să verifice automat instanțe specifice ale problemei rucsacului. \par
+Codul sursă poate fi găsit la adresa \url{https://github.com/Haidau-Alina-Adriana/Licenta}. Pentru verificarea formală a acestei implementări am folosit versiunea 4.10.0 a serverului de limbaj Dafny. \par
 \end{sloppypar}

@@ -1,7 +1,7 @@
 \chapter{Punctul de intrare și arhitectura codului}
 \begin{sloppypar}
 
-Execuția algoritmului propus pornește de la o metodă principală numită \formatText{solve} ce primește ca parametru o problemă \textit{p: Problem}. O \textbf{metodă} în Dafny reprezintă un fragment de cod ce conține operații executabile și ce modifică starea variabilelor definite \cite{DBLP:series/natosec/KoenigL12}. Această metodă va trebui să întoarcă două rezultate, un rezultat este valoarea profitului maxim \textit{profit: int} care se poate obține pentru instanța problemei oferită, iar cel de-al doilea rezultat este soluția \textit{solution: Solution} corespunzătoare profitului obținut formată din elemente de 0 și 1:
+Execuția algoritmului propus pornește de la o metodă principală numită \texttt{solve} ce primește ca parametru o problemă \texttt{p: Problem}. O \textbf{metodă} în Dafny reprezintă un fragment de cod ce conține operații executabile și ce modifică starea variabilelor definite \cite{DBLP:series/natosec/KoenigL12}. Această metodă va trebui să întoarcă două rezultate, un rezultat este valoarea profitului maxim \texttt{profit: int} care se poate obține pentru instanța problemei oferită, iar cel de-al doilea rezultat este soluția \texttt{solution: Solution} corespunzătoare profitului obținut formată din elemente de 0 și 1:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{method} \PY{n+nf}{solve}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{)} \PY{k}{returns} \PY{p}{(}\PY{n}{profit}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -45,11 +45,10 @@ Execuția algoritmului propus pornește de la o metodă principală numită \for
     \PY{n}{profit} \PY{o}{:=} \PY{n}{profits}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{n}\PY{p}{]}\PY{p}{[}\PY{n}{p}\PY{p}{.}\PY{n}{c}\PY{p}{]}\PY{p}{;}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    \par Postcondițiile \formatText{isSolution} și \formatText{isOptimalSolution} ne asigură că la finalul execuției metodei obținem o soluție validă doar cu elemente de 0 și 1, de lungime egală cu numărul de obiecte, ce nu depășește capacitatea rucsacului și de profit maxim.
-    \par Începem prin a inițializa matricile \textit{profits} și \textit{solutions} cu secvențe vide, iar numărul de obiecte disponibile este contorizat prin $i$ și este inițializat cu 0. Vom obține rezultatele pentru cazurile de bază, mai exact pentru subproblemele în care $i = 0$ (mulțimea obiectelor este vidă) și pentru fiecare capacitate parțială a rucsacului invocând o altă metodă, 
-    numită \formatText{solves0Objects}, implementată astfel: 
+    \par Postcondițiile \texttt{isSolution} și \texttt{isOptimalSolution} ne asigură că la finalul execuției metodei obținem o soluție validă, doar cu elemente de 0 și 1, de lungime egală cu numărul de obiecte, ce nu depășește capacitatea rucsacului și care are profit maxim.
+    \par Începem prin a inițializa matricile \texttt{profits} și \texttt{solutions} cu secvențe vide, iar numărul de obiecte disponibile este contorizat prin $i$ și este inițializat cu 0. Vom obține rezultatele pentru cazurile de bază, mai exact pentru subproblemele în care $i = 0$ (mulțimea obiectelor disponibile este vidă) și pentru fiecare capacitate parțială a rucsacului invocând o altă metodă, 
+    numită \texttt{solves0Objects}, implementată astfel: 
     \begin{Verbatim}[commandchars=\\\{\}]
-    
 \PY{k+kd}{var} \PY{n}{j} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
 \PY{k}{while} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c}
   \PY{k}{invariant} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{j} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1}
@@ -68,24 +67,24 @@ Execuția algoritmului propus pornește de la o metodă principală numită \for
     \PY{n}{j} \PY{o}{:=} \PY{n}{j} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{;}
   \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    \par Știm că $i$ este 0 în acest caz, mai exact nu avem niciun obiect la dispoziție, prin urmare cel mai bun profit care se poate obține este 0, iar soluțiile nu trebuie să conțină niciun element, deoarece nu avem ce să adăugăm în rucsac. Am folosit o buclă \textit{while} pentru a considera toate valorile posibile pe care le poate avea capacitatea rucsacului, iar la fiecare iterație soluțiile, respectiv profiturile aferente sunt memorate în \textit{partialSolutions}, respectiv \textit{partialProfits}. \par
-    Structurile repetitive reprezintă, de obicei, o provocare pentru Dafny deoarece nu este mereu clar câte iterații sunt necesare, dar și datorită faptului că acesta trebuie să verifice anumite proprietăți care nu trebuie să se modifice pe parcursul procesului iterativ, ceea ce complică demonstrarea corectitudinii \cite{DBLP:series/natosec/KoenigL12}. Astfel avem nevoie de niște adnotări pentru a-i specifica verificatorului ce informații se păstrează pe parcursul structurii repetitive. Pentru acest lucru este folosită clauza \textbf{invariant}. Cu ajutorul acestor adnotări se pot specifica expresii logice care trebuie să fie adevărate pe toată durata structurii, inclusiv înainte de intrarea în buclă \cite{DBLP:series/natosec/KoenigL12}. Invariantul
+    \par Știm că $i$ este 0 în acest caz, mai exact nu avem niciun obiect la dispoziție, prin urmare cel mai bun profit care se poate obține este 0, iar soluțiile nu trebuie să conțină niciun element, deoarece nu avem ce să adăugăm în rucsac. Am folosit o buclă \texttt{while} pentru a considera toate valorile posibile pe care le poate avea capacitatea rucsacului, iar la fiecare iterație soluțiile, respectiv profiturile aferente, sunt memorate în \texttt{partialSolutions}, respectiv \texttt{partialProfits}. \par
+    Structurile repetitive reprezintă, de obicei, o provocare pentru Dafny deoarece nu este mereu clar câte iterații sunt necesare, dar și din cauza faptului că acesta trebuie să verifice anumite proprietăți care nu trebuie să se modifice pe parcursul procesului iterativ, ceea ce complică demonstrarea corectitudinii \cite{DBLP:series/natosec/KoenigL12}. Astfel avem nevoie de adnotări pentru a ajuta verificatorul cu proprietățile care rămân adevărate pe parcursul structurii repetitive. Pentru acest lucru este folosită clauza \textbf{invariant}. Cu ajutorul acestor adnotări se pot specifica expresii logice care trebuie să fie adevărate pe toată durata structurii, inclusiv înainte de intrarea în buclă \cite{DBLP:series/natosec/KoenigL12}. Invariantul
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
     \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
 \end{Verbatim}
-    ne garantează faptul că pe parcursul buclei toate soluțiile calculate își păstrează proprietatea de \textbf{soluție optimă parțială}, iar invariantul 
+    ne garantează faptul că pe parcursul buclei toate soluțiile calculate își păstrează proprietatea de \textbf{soluție parțială optimă}, iar invariantul 
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k}{invariant} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
     \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
 \end{Verbatim}
-    are scopul de a ajuta verificatorul să înțeleagă relația dintre cele două secvențe cu rezultate, mai exact aplicând funcția \textit{gain} peste o soluție stocată în secvența \textit{partialSolutions}, rezultatul acesta poate fi interpretat ca fiind cel stocat în aceeași poziție în secvența \textit{partialProfits}. Pentru consistență, proprietățile definite de acești invarianți trebuie să fie respectate de toate soluțiile memorate pe parcurs, de aceea se vor repeta și în cadrul invarianților din celelalte metode.
-    \par De asemenea, deoarece proprietățile demonstrate în corpul buclelor sunt disponibile într-un scop limitat (de obicei chiar la blocul de instrucțiuni al structurii) \cite{verification_optimization}, cu ajutorul invarianților acestea devin adevărate și după execuția buclelor, fiind un ajutor important în verificarea postcondițiilor. Această metodă garantează astfel că soluțiile aferente cazurilor de bază sunt optime și respectă limitările impuse față de lungimea rezultatelor stocate. \\ \par
+    are scopul de a ajuta verificatorul să înțeleagă relația dintre cele două secvențe cu rezultate: aplicând funcția \texttt{gain} peste o soluție stocată în secvența \texttt{partialSolutions}, rezultatul acesta este cel stocat în aceeași poziție în secvența \texttt{partialProfits}. Pentru consistență, proprietățile definite de acești invarianți trebuie să fie respectate de toate soluțiile memorate pe parcurs, de aceea se vor repeta și în cadrul invarianților din celelalte metode.
+    \par De asemenea, deoarece, din motive de modularitate, proprietățile demonstrate în corpul buclelor sunt vizibile doar în blocul de instrucțiuni al structurii \texttt{while} \cite{verification_optimization}, cu ajutorul invarianților acestea pot deveni vizibile și după execuția buclelor, fiind un ajutor important în verificarea postcondițiilor. Această metodă garantează astfel că soluțiile aferente cazurilor de bază sunt optime și respectă limitările impuse față de lungimea rezultatelor stocate. \\ \par
 
-    \par După ce am obținut soluțiile cazurilor de bază, începem procesul iterativ. Metoda \formatText{solve} este cea care ține evidența numărului de obiecte și care salvează în matricile anterior menționate rezultatele concrete, care sunt calculate, verificate și returnate de către metoda \formatText{getPartialProfits}, în care fiecare ramură \textit{if} corespunde unei decizii de acceptare sau respingere a obiectului:
+    \par După ce am obținut soluțiile cazurilor de bază, începem procesul iterativ. Metoda \texttt{solve} este cea care ține evidența numărului de obiecte și care salvează în matricile anterior menționate rezultatele concrete, care sunt calculate, verificate și returnate de către metoda \texttt{getPartialProfits}, în care fiecare ramură \texttt{if} corespunde unei decizii de acceptare sau respingere a obiectului:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{method} \PY{n+nf}{getPartialProfits}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{profits}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} 
- \PY{n}{solutions} \PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
+ \PY{n}{solutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)} 
   \PY{k}{returns} \PY{p}{(}\PY{n}{partialProfits}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{:} \PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{seq}\PY{o}{\PYZlt{}}\PY{k+kt}{int}\PY{o}{\PYZgt{}}\PY{o}{\PYZgt{}}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
   \PY{k}{requires} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}} \PY{n}{i} \PY{o}{\PYZlt{}} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1}
@@ -97,13 +96,15 @@ Execuția algoritmului propus pornește de la o metodă principală numită \for
     \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{,} \PY{n}{k}\PY{p}{,} \PY{n}{q}\PY{p}{)} 
   \PY{k}{requires} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
     \PY{k}{forall} \PY{n}{q} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{q} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
-     \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}
+      \PY{n}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+      \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{profits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{[}\PY{n}{q}\PY{p}{]}
   \PY{k}{ensures} \PY{n}{p}\PY{p}{.}\PY{n}{c} \PY{o}{+} \PY{l+m+mi}{1} \PY{o}{==} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==} \PY{o}{|}\PY{n}{partialProfits}\PY{o}{|}
   \PY{k}{ensures} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{o}{|}\PY{n}{profits}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n} \PY{o}{+} \PY{l+m+mi}{1} 
   \PY{k}{ensures} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
     \PY{n}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{i}\PY{p}{,} \PY{n}{k}\PY{p}{)}
   \PY{k}{ensures} \PY{k}{forall} \PY{n}{k} \PY{p}{::} \PY{l+m+mi}{0} \PY{o}{\PYZlt{}=} \PY{n}{k} \PY{o}{\PYZlt{}} \PY{o}{|}\PY{n}{partialSolutions}\PY{o}{|} \PY{o}{==}\PY{o}{\PYZgt{}} 
-    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}
+    \PY{p}{(}\PY{n}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} 
+    \PY{n}{gain}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{partialSolutions}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)} \PY{o}{==} \PY{n}{partialProfits}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)}
 \PY{p}{\PYZob{}}
   \PY{k+kd}{var} \PY{n}{j} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
   \PY{n}{partialProfits} \PY{o}{:=} \PY{p}{[}\PY{p}{]}\PY{p}{;}
@@ -151,16 +152,16 @@ Execuția algoritmului propus pornește de la o metodă principală numită \for
     \PY{p}{\PYZcb{}}
 \PY{p}{\PYZcb{}}
 \end{Verbatim} 
-    \par Metoda primește ca parametri secvențele \textit{profits} și \textit{solutions} ce memorează rezultatele calculate în iterațiile anterioare pentru a evita recalcularea și returnează alte secvențe în care sunt memorate rezultatele iterației curente după ce ne asigurăm că ele sunt corecte și optime pentru subproblemele pe care le rezolvă. \par
-    Invarianții folosiți aici sunt necesari pentru verificarea cu succes a metodei și de asemenea corespund cu postcondițiile, deoarece metoda apelantă \formatText{solve} trebuie să știe ce fel de rezultate primește înapoi. După cum se poate observa, invarianții sunt similari cu cei descriși pentru metoda \formatText{solves0Objects} și au rolul de a ajuta verificatorul să demonstreze corectitudinea postcondițiilor. Fără aceștia, el nu ar știi ce modificări s-ar produce în corpul buclei asupra variabilelor folosite. \par
-    Am folosit o buclă \textit{while}, asemănător metodei \formatText{solves0Objects}, pentru a trece prin valorile parțiale ale capacității rucsacului, pornind de la 0 și incrementând cu 1 până la capacitatea totală a acestuia. Astfel, având metoda \formatText{solve} care iterează prin valorile posibile pentru $i$ (ce reprezintă numărul de obiecte considerate) și metoda \formatText{getPartialProfits} care iterează prin valorile posibile pentru $j$ (ce reprezintă capacitatea parțială pe care o poate avea rucsacul), acoperim toate subproblemele pentru care avem nevoie ca să ajungem la soluția finală. \par
-    Știm că avem cel puțin un obiect disponibil în acest punct al algoritmului. Numărul de obiecte este fix pentru această metodă, deci trebuie să luăm în considerare doar valoarile posibile ale capacității. Astfel, avem patru cazuri pe care trebuie să le rezolvăm:
+    \par Metoda primește ca parametri secvențele \texttt{profits} și \texttt{solutions}, în care sunt salvate rezultatele calculate în iterațiile anterioare pentru a evita recalcularea. Aceasta returnează alte secvențe în care sunt stocate rezultatele iterației curente după ce ne asigurăm că ele sunt corecte și optime pentru subproblemele pe care le rezolvă. \par
+    Invarianții folosiți aici sunt necesari pentru verificarea cu succes a metodei și de asemenea corespund cu postcondițiile, deoarece metoda apelantă \texttt{solve} trebuie să știe ce fel de rezultate primește înapoi. După cum se poate observa, invarianții sunt similari cu cei descriși pentru metoda \texttt{solves0Objects} și au rolul de a ajuta verificatorul să demonstreze corectitudinea postcondițiilor. Fără aceștia, el nu ar știi ce modificări s-ar produce în corpul buclei asupra variabilelor folosite. \par
+    Am folosit o buclă \texttt{while}, asemănător metodei \texttt{solves0Objects}, pentru a trece prin valorile parțiale ale capacității rucsacului, pornind de la 0 și incrementând cu 1 până la capacitatea totală a acestuia. Astfel, având metoda \texttt{solve} care iterează prin valorile posibile pentru $i$ (ce reprezintă numărul de obiecte considerate) și metoda \texttt{getPartialProfits} care iterează prin valorile posibile pentru $j$ (ce reprezintă capacitatea parțială pe care o poate avea rucsacul), acoperim toate subproblemele de care avem nevoie ca să ajungem la soluția finală. \par
+    Numărul de obiecte este fixat ca parametru al metodei \texttt{getPartialProfits}, deci trebuie să luăm în considerare doar valorile posibile ale capacității. Astfel, avem patru cazuri pe care trebuie să le rezolvăm:
     \begin{itemize}
         \item cazul în care capacitatea parțială a ruscacului este 0
         \begin{Verbatim}[commandchars=\\\{\}]
                         \PY{k}{if} \PY{n}{j} \PY{o}{==} \PY{l+m+mi}{0}
 \end{Verbatim}
-        este un caz special, poate fi considerat tot un caz de bază. Capacitatea fiind 0 ar însemna că avem un rucsac ce nu poate susține niciun obiect, deci nu putem include nimic în acest punct al algoritmului. Acest caz este tratat în metoda \formatText{solvesCapacity0}:
+        este un caz special și poate fi considerat tot un caz de bază. Capacitatea fiind 0, avem un rucsac ce nu poate susține niciun obiect. Acest caz este tratat în metoda \texttt{solvesCapacity0}:
         \begin{Verbatim}[commandchars=\\\{\}]
 \PY{n}{currentProfit} \PY{o}{:=} \PY{l+m+mi}{0}\PY{p}{;}
 \PY{n}{currentSolution} \PY{o}{:=} \PY{k+kt}{seq}\PY{p}{(}\PY{n}{i}\PY{p}{,} \PY{n}{y} \PY{o}{=}\PY{o}{\PYZgt{}} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{;}
@@ -170,28 +171,28 @@ Execuția algoritmului propus pornește de la o metodă principală numită \for
         \begin{Verbatim}[commandchars=\\\{\}]
                     \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{n}{j}
 \end{Verbatim}
-        aferent ultimului \textit{if} din această metodă oferă iarăși o alegere relativ simplă, obiectul nu poate fi adăugat în rucsac pentru subproblema cu $i$ obiecte și capacitate $j$, astfel că profitul va rămâne același ca în pasul anterior pentru aceeași capacitate, respectiv $\textit{profits}[i - 1][j]$, iar soluția pentru subproblema curentă va fi cea de la pasul anterior, respectiv $\textit{solutions}[i - 1][j]$ la care se va adăuga un 0 pentru a marca decizia luată în acest pas:
+        aferent ultimului \texttt{if} din această metodă oferă iarăși o alegere relativ simplă. Obiectul nu poate fi adăugat în rucsac pentru subproblema cu $i$ obiecte și capacitate $j$, astfel că profitul va rămâne același ca în pasul anterior pentru aceeași capacitate, respectiv $\texttt{profits}[i - 1][j]$. Soluția pentru subproblema curentă va fi cea de la pasul anterior, respectiv $\texttt{solutions}[i - 1][j]$, la care se va adăuga un 0 pentru a marca decizia luată în acest pas:
         \begin{Verbatim}[commandchars=\\\{\}]
 \PY{n}{currentProfit} \PY{o}{:=} \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{;}
 \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solutions}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}\PY{p}{;}
 \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{currentSolution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
 \end{Verbatim}
-        este implementarea din metoda \formatText{solvesAdd0TooBig}.
+        Acest caz este tratat în metoda \texttt{solvesAdd0TooBig}.
         \item cazul în care greutatea obiectului curent nu depășeste capacitatea rucsacului și adăugarea acestuia aduce un profit mai bun decât cel anterior pentru aceeași capacitate $j$:
         \begin{Verbatim}[commandchars=\\\{\}]
  \PY{k}{if} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]} \PY{o}{\PYZgt{}} 
                     \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j}\PY{p}{]}
 \end{Verbatim}
-        este cel care produce elementele de 1 în soluții, element care de această dată este adăugat soluției de pe poziția ce corespunde capacității rămase după ce am inclus greutatea obiectului. Profitul în acest caz este calculat adunând profitul de pe aceeași poziție a secvenței \textit{profits} și câștigul obiectului curent:
+        este cel care produce elementele de 1 în soluții, element care de această dată este adăugat soluției de pe poziția ce corespunde capacității rămase după ce am inclus greutatea obiectului. Profitul în acest caz este calculat adunând profitul de pe aceeași poziție a secvenței \texttt{profits} și câștigul obiectului curent:
         \begin{Verbatim}[commandchars=\\\{\}]
 \PY{n}{currentProfit} \PY{o}{:=} \PY{n}{p}\PY{p}{.}\PY{n}{gains}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]} \PY{o}{+} 
     \PY{n}{profits}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{;}
 \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{solutions}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{[}\PY{n}{j} \PY{o}{\PYZhy{}} \PY{n}{p}\PY{p}{.}\PY{n}{weights}\PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{]}\PY{p}{;}
 \PY{n}{currentSolution} \PY{o}{:=} \PY{n}{currentSolution} \PY{o}{+} \PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
 \end{Verbatim}
-        Caz tratat în metoda \formatText{solvesAdd1BetterProfit}.
-        \item cazul în care deși greutatea obiectului curent nu depășește capacitatea $j$, includerea acestuia nu produce un profit mai bun față de excluziunea lui. În acest caz, un 0 este adăugat soluției de la pasul $\textit{solutions}[i - 1][j]$, iar profitul rămâne același ca cel de pe poziția corespunzătoare din \textit{profits}. Cazul este tratat în \formatText{solvesAdd0BetterProfit} și are implementare similară cu \formatText{solvesAdd0TooBig}.
+        Acest caz este tratat în metoda \texttt{solvesAdd1BetterProfit}.
+        \item cazul în care deși greutatea obiectului curent nu depășește capacitatea $j$, includerea acestuia nu produce un profit mai bun față de excluziunea lui. În acest caz, un 0 este adăugat soluției de la pasul $\texttt{solutions}[i - 1][j]$, iar profitul rămâne același ca cel de pe poziția corespunzătoare din \texttt{profits}. Cazul este tratat în metoda \texttt{solvesAdd0BetterProfit} și are implementare similară cu \texttt{solvesAdd0TooBig}.
     \end{itemize}
-    După cum am menționat, fiecare caz va fi tratat într-o metodă diferită, unde fiecare condiție din \textit{if} din metoda curentă va deveni o precondiție a metodei în care este tratat fiecare caz de mai sus. Alte precondiții similare pentru aceste metode vor fi limitările legate de numărul de obiecte, cât și informații despre soluțiile subproblemelor calculate în iterațiile anterioare. Acestea sunt necesare ca specificații deoarece Danfy nu are acces la informațiile din metoda apelantă, fiecare metodă având o responsabilitate separată.
+    După cum am menționat, fiecare caz este tratat într-o metodă diferită, unde fiecare condiție din \texttt{if} din metoda curentă este o precondiție a metodei în care este tratat cazul respectiv. Alte precondiții similare pentru aceste metode vor fi limitările legate de numărul de obiecte, cât și informații despre soluțiile subproblemelor calculate în iterațiile anterioare. Acestea sunt necesare ca specificații, deoarece Danfy nu are acces la codul sursă și la specificațiile metodei apelante, fiecare metodă fiind verificată separat din motive de modularitate.
 
 \end{sloppypar}

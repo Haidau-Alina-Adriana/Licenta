@@ -3,11 +3,11 @@
 \begin{sloppypar}
 
 În cadrul problemei rucsacului putem discuta despre ce reprezintă soluția optimă, cât și soluțiile parțiale optime. \par
-Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o secvență de secvențe numită \texttt{profits} de tip \texttt{seq<seq<int>>}. Deși la bază această variabilă este o secvență, ea poate fi privită ca o matrice bidimensională, iar rezultatele pot fi accesate folosind operatorul de indexare similar unui astfel de tablou: $\textit{profits}[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm. 
+Pentru a stoca rezultatele corespunzătoare câștigurilor subproblemelor am folosit o secvență de secvențe numită \texttt{profits}, de tip \texttt{seq<seq<int>>}. Deși această variabilă este o secvență de secvențe, ea poate fi privită ca o matrice bidimensională, iar rezultatele pot fi accesate folosind operatorul de indexare similar unui astfel de tablou: $\texttt{profits}[i][j]$, unde $i$ și $j$ reprezită mărimea subproblemei pe care încercăm să o rezolvăm. 
 \par
-Pe lângă matricea \texttt{profits}, această lucrare se mai bazează și pe o variabilă numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>} care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Ea poate fi privită tot ca un tablou multidimensional, de aceea rezultatele sunt accesate similar matricei \textit{profits}.
+Pe lângă matricea \texttt{profits}, această lucrare se mai bazează și pe o variabilă numită \texttt{solutions} de tip \texttt{seq<seq<seq<int>>>}, care va stoca fiecare secvență binară corespunzătoare profitului stocat în matricea \texttt{profits}. Ea poate fi privită tot ca un tablou multidimensional, iar valorile sunt accesate similar matricei \texttt{profits}.
 \par
-O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizează profitul format din câștigul fiecărui item care poate fi adăugat în rucsac, dar care în același timp respectă constrângerile legate de capacitatea rucsacului. Această soluție adresează problema completă, deținând decizia de includere a fiecărui obiect, iar profitul calculat trebuie să aibă cea mai mare valoare pe care o putem obține pentru instanța primită.  În cazul acestei lucrări, pentru a verifica soluția finală (despre care am discutat în capitolul anterior) am formulat predicatul \formatText{isOptimalSolution} astfel:
+O \textbf{soluție optimă} reprezintă selecția de obiecte care produce cel mai bun profit format din câștigul fiecărui obiect care poate fi adăugat în rucsac, dar care în același timp nu depășește capacitatea totală a rucsacului. Această soluție vizează problema completă, deținând decizia de includere a fiecărui obiect, iar profitul calculat trebuie să aibă cea mai mare valoare pe care o putem obține pentru instanța primită.  În cazul acestei lucrări, pentru a verifica soluția finală (despre care am discutat în capitolul anterior) am formulat predicatul \texttt{isOptimalSolution} astfel:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
     \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
@@ -23,7 +23,7 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
 \par Cuvântul cheie \texttt{ghost} este folosit pentru a marca faptul că acest predicat este folosit doar în partea de verificare și nu este inclus în codul executabil \cite{leino2021dafny}.
 \par Condițiile exprimate folosind clauza \texttt{requires} sunt numite \textbf{precondiții} și reprezintă proprietăți pe care parametrii trebuie să îi respecte înainte de intrarea în corpul unei funcții, a unei metode, leme sau predicat și care vor fi valabile până la ieșirea din acestea \cite{DBLP:series/natosec/KoenigL12}. Sunt esențiale pentru Dafny deoarece dacă acestea nu sunt satisfăcute la momentul apelului, atunci nu mai există nicio garanție privind comportamenul corect al programului.
 
-\par O \formatText{soluție parțială} este o secvență binară de o lungime variabilă care nu depășește numărul de obiecte și care respectă constrângerea legată de capacitatea rucsacului. Predicatul formulat pentru a confirma o astfel de soluție este \formatText{isPartialSolution}:
+\par O \textbf{soluție parțială} este o secvență binară, de lungime variabilă care nu depășește numărul de obiecte și care respectă constrângerea legată de capacitatea rucsacului. Predicatul formulat pentru a confirma o astfel de soluție este \texttt{isPartialSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} 
         \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
@@ -35,7 +35,7 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
   \PY{n}{weight}\PY{p}{(}\PY{n}{p}\PY{p}{,} \PY{n}{solution}\PY{p}{)} \PY{o}{\PYZlt{}=} \PY{n}{j}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    și vine în completarea predicatului \formatText{isValidPartialSolution}:
+    și depinde de valoarea de adevăr a predicatului \texttt{isValidPartialSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{isValidPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
   \PY{k}{requires} \PY{n}{isValidProblem}\PY{p}{(}\PY{n}{p}\PY{p}{)}
@@ -43,7 +43,7 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
   \PY{n}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{)} \PY{o}{\PYZam{}\PYZam{}} \PY{o}{|}\PY{n}{solution}\PY{o}{|} \PY{o}{\PYZlt{}=} \PY{n}{p}\PY{p}{.}\PY{n}{n}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-\par Cu ajutorul celor două predicate am verificat dacă o soluție este parțială și validă: are doar elemente de 0 și 1, lungimea acesteia nu depășește numărul de obiecte și are o greutate cel mult egală cu capacitatea $j$ a rucsacului. Predicatul apelat \formatText{hasAllowedValues} este definit astfel:
+\par Cu ajutorul celor două predicate am verificat dacă o soluție este parțială și validă: are doar elemente de 0 și 1, lungimea acesteia nu depășește numărul de obiecte și are o greutate cel mult egală cu capacitatea $j$ a rucsacului. Predicatul apelat \texttt{hasAllowedValues} este definit astfel:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{predicate} \PY{n+nf}{hasAllowedValues}\PY{p}{(}\PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{)}
 \PY{p}{\PYZob{}}
@@ -51,9 +51,9 @@ O \formatText{soluție optimă} reprezintă selecția de obiecte care maximizeaz
         \PY{o}{|}\PY{o}{|} \PY{n}{solution}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}
 \PY{p}{\PYZcb{}}
 \end{Verbatim}
-    și asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 reprezintă faptul că obiectul nu este inclus în rucsac, iar 1 înseamnă că obiectul este inclus în rucsac.
+și asigură că toate elementele unei soluții aparțin exclusiv mulțimii $\{0, 1\}$, unde 0 reprezintă faptul că obiectul nu este inclus în rucsac, iar 1 înseamnă că obiectul este inclus în rucsac.
 
-O \formatText{soluție optimă parțială} reprezintă un rezultat optim intermediar calculat pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând exemplul prezentat în introducere, o soluție optimă parțială pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ deoarece aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8. Pentru a verifica dacă avem o astfel de soluție am implementat predicatul \formatText{isOptimalPartialSolution}:
+O \textbf{soluție parțială optimă} reprezintă o secvență de elemente de 0 și 1, al cărei profit este optim pentru un subset de obiecte sau pentru o capacitate parțială a rucsacului. Luând un exemplu prezentat în introducere, o soluție parțială optimă pentru subproblema $(i = 3, j = 8)$ este $[0, 1, 1]$ deoarece aduce cel mai bun profit pentru un subset ce include doar primele trei obiecte, având la dispoziție un rucsac de capacitate maximă 8. Pentru a verifica dacă avem o astfel de soluție am implementat predicatul \texttt{isOptimalPartialSolution}:
     \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k+kd}{ghost} \PY{k+kd}{predicate} \PY{n+nf}{isOptimalPartialSolution}\PY{p}{(}\PY{n}{p}\PY{p}{:} \PY{n}{Problem}\PY{p}{,} 
     \PY{n}{solution}\PY{p}{:} \PY{n}{Solution}\PY{p}{,} \PY{n}{i}\PY{p}{:} \PY{k+kt}{int}\PY{p}{,} \PY{n}{j}\PY{p}{:} \PY{k+kt}{int}\PY{p}{)}
